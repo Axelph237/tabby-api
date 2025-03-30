@@ -1,0 +1,490 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 17.4
+-- Dumped by pg_dump version 17.4
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: get_menu_items(uuid); Type: FUNCTION; Schema: public; Owner: neondb_owner
+--
+
+CREATE FUNCTION public.get_menu_items(p_menu_id uuid) RETURNS TABLE(menu_item_id UUID, name text, description text, img_url text, base_price integer, options jsonb)
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+        WITH menu_ref AS (
+            SELECT menus.created_by AS user_id, menus.id AS menu_id
+            FROM menus
+            WHERE menus.id = p_menu_id
+            LIMIT 1
+        ), menu_items_ref AS (
+            SELECT menu_items.item_id, id
+            FROM menu_items
+            WHERE menu_items.menu_id = p_menu_id
+        )
+        SELECT menu_items_ref.id as menu_item_id, user_items.name, user_items.description, user_items.img_url, user_items.base_price, user_items.options
+        FROM get_user_items((SELECT user_id FROM menu_ref)) AS user_items
+                 JOIN menu_items_ref ON menu_items_ref.item_id = user_items.item_id;
+END;
+$$;
+
+
+--ALTER FUNCTION public.get_menu_items(p_menu_id uuid) OWNER TO neondb_owner;
+
+--
+-- Name: get_user_items(uuid); Type: FUNCTION; Schema: public; Owner: neondb_owner
+--
+
+CREATE FUNCTION public.get_user_items(p_user_id uuid) RETURNS TABLE(item_id integer, created_by uuid, name text, description text, img_url text, base_price integer, options jsonb)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  RETURN QUERY
+  -- FILTER TABLES FOR USER'S ITEMS
+-- Reduce join complexity
+WITH user_items AS (
+  SELECT id, items.name, items.description, items.img_url, items.base_price, items.created_by
+  FROM items
+  WHERE items.created_by = p_user_id
+), user_opts AS (
+  SELECT item_options.item_id, item_options.id, item_options.label, item_options.type
+  FROM item_options
+  WHERE item_options.created_by = p_user_id
+), 
+-- CREATE OBJECTS FROM TABLES
+select_objs AS (
+  SELECT item_option_selections.item_option_id, COALESCE(jsonb_agg(
+    jsonb_build_object(
+        'label', label, 
+        'price', COALESCE(price, 0), 
+        'is_default', COALESCE(is_default, FALSE)
+      )
+    ), '[]'::jsonb) AS selections
+  FROM item_option_selections
+  WHERE item_option_selections.created_by = p_user_id
+  GROUP BY item_option_selections.item_option_id
+), option_objs AS (
+  SELECT user_opts.item_id, COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'label', user_opts.label,
+      'type', user_opts.type,
+      'selections', select_objs.selections
+    )
+  ), '[]'::jsonb) AS options
+  FROM user_opts
+  JOIN select_objs ON select_objs.item_option_id = user_opts.id
+  GROUP BY user_opts.item_id
+)
+-- PRESENT DATA
+SELECT 
+  user_items.id,
+  user_items.created_by,
+  user_items.name, 
+  user_items.description, 
+  user_items.img_url, 
+  user_items.base_price, 
+  COALESCE(option_objs.options, '[]'::jsonb)
+FROM user_items
+LEFT JOIN option_objs ON option_objs.item_id = user_items.id;
+END;
+$$;
+
+
+--ALTER FUNCTION public.get_user_items(p_user_id uuid) OWNER TO neondb_owner;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: cart_item_selections; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.cart_item_selections (
+    id integer NOT NULL,
+    cart_item_id integer NOT NULL,
+    option_selection integer NOT NULL
+);
+
+
+--ALTER TABLE public.cart_item_selections OWNER TO neondb_owner;
+
+--
+-- Name: cart_item_selections_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE public.cart_item_selections ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.cart_item_selections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: cart_items; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.cart_items (
+    id serial NOT NULL,
+    cart_id integer NOT NULL,
+    item_id integer NOT NULL,
+    count integer,
+    total_price integer
+);
+
+
+--ALTER TABLE public.cart_items OWNER TO neondb_owner;
+
+--
+-- Name: carts; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.carts (
+    id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    created_by uuid DEFAULT gen_random_uuid(),
+    menu_id uuid
+);
+
+
+--ALTER TABLE public.carts OWNER TO neondb_owner;
+
+--
+-- Name: carts_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE public.carts ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.carts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: item_option_selections; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.item_option_selections (
+    id integer NOT NULL,
+    item_option_id integer NOT NULL,
+    label text NOT NULL,
+    price integer,
+    is_default boolean DEFAULT false,
+    created_by uuid
+);
+
+
+--ALTER TABLE public.item_option_selections OWNER TO neondb_owner;
+
+--
+-- Name: item_option_selections_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE public.item_option_selections ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.item_option_selections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: item_options; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.item_options (
+    id integer NOT NULL,
+    label text NOT NULL,
+    type text NOT NULL,
+    item_id integer NOT NULL,
+    created_by uuid,
+    CONSTRAINT type_valid CHECK ((type = ANY (ARRAY['one'::text, 'many'::text, 'text'::text])))
+);
+
+
+--ALTER TABLE public.item_options OWNER TO neondb_owner;
+
+--
+-- Name: item_options_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE public.item_options ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.item_options_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: items; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.items (
+    id serial PRIMARY KEY,
+    created_at date DEFAULT now(),
+    name text NOT NULL,
+    description text,
+    img_url text,
+    base_price integer,
+    created_by uuid
+);
+
+
+--ALTER TABLE public.items OWNER TO neondb_owner;
+
+--
+-- Name: items_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+CREATE SEQUENCE public.items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--ALTER SEQUENCE public.items_id_seq OWNER TO neondb_owner;
+
+--
+-- Name: items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: neondb_owner
+--
+
+ALTER SEQUENCE public.items_id_seq OWNED BY public.items.id;
+
+
+--
+-- Name: menu_items; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.menu_items (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    item_id integer NOT NULL,
+    menu_id uuid
+);
+
+
+--ALTER TABLE public.menu_items OWNER TO neondb_owner;
+
+--
+-- Name: menus; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.menus (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    created_by uuid DEFAULT gen_random_uuid(),
+    name text NOT NULL
+);
+
+
+--ALTER TABLE public.menus OWNER TO neondb_owner;
+
+--
+-- Name: items id; Type: DEFAULT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.items ALTER COLUMN id SET DEFAULT nextval('public.items_id_seq'::regclass);
+
+
+--
+-- Name: cart_item_selections cart_item_selections_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.cart_item_selections
+    ADD CONSTRAINT cart_item_selections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: cart_items cart_items_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.cart_items
+    ADD CONSTRAINT cart_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: carts carts_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.carts
+    ADD CONSTRAINT carts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_option_selections item_option_selections_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.item_option_selections
+    ADD CONSTRAINT item_option_selections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_options item_options_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.item_options
+    ADD CONSTRAINT item_options_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: menu_items menu_items_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.menu_items
+    ADD CONSTRAINT menu_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: menus menu_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.menus
+    ADD CONSTRAINT menu_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_option_selections_created_by_hash; Type: INDEX; Schema: public; Owner: neondb_owner
+--
+
+CREATE INDEX item_option_selections_created_by_hash ON public.item_option_selections USING hash (created_by);
+
+
+--
+-- Name: item_options_created_by_hash; Type: INDEX; Schema: public; Owner: neondb_owner
+--
+
+CREATE INDEX item_options_created_by_hash ON public.item_options USING hash (created_by);
+
+
+--
+-- Name: items_created_by_hash; Type: INDEX; Schema: public; Owner: neondb_owner
+--
+
+CREATE INDEX items_created_by_hash ON public.items USING hash (created_by);
+
+
+--
+-- Name: cart_items cart_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.cart_items
+    ADD CONSTRAINT cart_id_fkey FOREIGN KEY (cart_id) REFERENCES public.carts(id);
+
+
+--
+-- Name: cart_item_selections cart_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.cart_item_selections
+    ADD CONSTRAINT cart_item_id_fkey FOREIGN KEY (cart_item_id) REFERENCES public.cart_items(id);
+
+
+--
+-- Name: carts carts_menu_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.carts
+    ADD CONSTRAINT carts_menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: item_options item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.item_options
+    ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: menu_items item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.menu_items
+    ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
+
+
+--
+-- Name: cart_items item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.cart_items
+    ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
+
+
+--
+-- Name: item_option_selections item_option_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.item_option_selections
+    ADD CONSTRAINT item_option_id_fkey FOREIGN KEY (item_option_id) REFERENCES public.item_options(id);
+
+
+--
+-- Name: menu_items menu_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.menu_items
+    ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: cart_item_selections option_selection_fkey; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.cart_item_selections
+    ADD CONSTRAINT option_selection_fkey FOREIGN KEY (option_selection) REFERENCES public.item_option_selections(id);
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: cloud_admin
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO neon_superuser WITH GRANT OPTION;
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: cloud_admin
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON TABLES TO neon_superuser WITH GRANT OPTION;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
