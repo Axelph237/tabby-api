@@ -230,6 +230,48 @@ ALTER FUNCTION public.get_user_items(p_user_id uuid) OWNER TO db_owner;
 
 
 --
+-- Triggers
+--
+
+-- Name: set_order_num()
+CREATE OR REPLACE FUNCTION public.set_order_num()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.order_num := (
+    SELECT COALESCE(MAX(order_num), 0) + 1
+    FROM public.orders AS o
+    WHERE o.session_id = NEW.session_id
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Name: update_order_cost()
+CREATE OR REPLACE FUNCTION public.update_order_cost()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.orders AS o
+  SET total_cost = total_cost + (NEW.unit_price * NEW.count)
+  WHERE o.id = NEW.order_id;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Name: set_unit_price()
+CREATE OR REPLACE FUNCTION public.set_unit_price()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.unit_price := (
+    SELECT SUM(COALESCE(price, 0))
+    FROM item_option_selections AS ios
+    WHERE ios.id = ANY (NEW.selections)
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+--
 -- Tables
 --
 SET default_tablespace = '';
@@ -330,6 +372,50 @@ CREATE TABLE public.menus (
 ALTER TABLE public.menus OWNER TO db_owner;
 
 
+-- Name: sessions; Type: TABLE; Schema: public; Owner: db_owner
+CREATE TABLE public.sessions (
+    id serial NOT NULL,
+    menu_id uuid NOT NULL,
+    expires timestamp with time zone,
+    PRIMARY KEY (id)
+);
+ALTER TABLE public.sessions OWNER TO db_owner;
+
+
+-- Name: orders
+CREATE TABLE public.orders (
+    id serial NOT NULL,
+    session_id integer NOT NULL,
+    guest_name text NOT NULL,
+    order_num integer NOT NULL,
+    total_cost integer DEFAULT 0 NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (session_id, guest_name, order_num)
+);
+ALTER TABLE public.orders OWNER TO db_owner;
+
+CREATE TRIGGER before_insert_set_order_num
+    BEFORE INSERT ON public.orders FOR EACH ROW EXECUTE FUNCTION public.set_order_num();
+
+
+-- Name: order_line_items
+CREATE TABLE public.order_line_items (
+    id serial NOT NULL,
+    item_id integer NOT NULL,
+    order_id integer NOT NULL,
+    count integer NOT NULL,
+    unit_price integer NOT NULL,
+    selections integer[],
+    PRIMARY KEY (id)
+);
+ALTER TABLE public.order_line_items OWNER TO db_owner;
+
+CREATE TRIGGER before_insert_set_unit_price
+    BEFORE INSERT ON public.order_line_items FOR EACH ROW EXECUTE FUNCTION public.set_unit_price();
+
+CREATE TRIGGER after_insert_update_order_price
+    AFTER INSERT ON public.order_line_items FOR EACH ROW EXECUTE FUNCTION public.update_order_cost();
+
 --
 -- Constraints
 --
@@ -366,6 +452,9 @@ ALTER TABLE ONLY public.items_to_menus
 ALTER TABLE ONLY public.items_to_menus
     ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id);
 
+-- Table: public.sessions
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id);
 
 --
 -- Indexes

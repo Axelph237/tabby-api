@@ -403,7 +403,7 @@ _Registered user must be owner of the menu_
 {
   "menu_id": UUID,
   "session_admins": [ UUID ], // list of users with ability to manage orders on session.
-  "end_time": Date // time for session to automatically close at. -1 leaves session open until manually closed.
+  "expires": Date // time for session to automatically close at. -1 leaves session open until manually closed.
 }
 ```
 

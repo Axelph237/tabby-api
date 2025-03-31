@@ -11,7 +11,7 @@
 4. User enters checkout name.
 5. User checks out:
     1. User's order is POSTed to `session/:sessId/orders/`.
-    2. Server creates order for (guest_name, order_number, opinst_id).
+    2. Server creates order for (guest_name, order_number, sess_id).
 6. User's checkout succeeds and they are taken to queue page.
 
 ## Menu Creation
