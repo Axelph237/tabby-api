@@ -9,6 +9,7 @@ const app = new Elysia()
 		SERVICE: ServiceError
 	})
 	.onError(({ code, error }) => {
+		console.log(error);
 		switch (code) {
 			case "SERVICE":
 				return new Response(error.toString(), { status: 500 });

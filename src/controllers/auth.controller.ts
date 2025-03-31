@@ -25,4 +25,3 @@ export const AuthController = new Elysia()
 		// send request to API with token
 		console.log(accessToken);
 	})
-	.listen(3000);
