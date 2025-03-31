@@ -10,8 +10,8 @@
 3. User proceeds to checkout page
 4. User enters checkout name.
 5. User checks out:
-    1. User's cart is POSTed to `/users/guests/:guestName/carts/`.
-    2. Server creates cart, returning cart details and new guestId.
+    1. User's order is POSTed to `session/:sessId/orders/`.
+    2. Server creates order for (guest_name, order_number, opinst_id).
 6. User's checkout succeeds and they are taken to queue page.
 
 ## Menu Creation

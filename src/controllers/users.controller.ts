@@ -9,7 +9,10 @@ import {
 } from "../schema/schema.interfaces";
 import {Value} from "@sinclair/typebox/value";
 
-const RegisteredUsersController = new Elysia({ prefix: "/registered/:userId" })
+/**
+ * @deprecated - Use other controllers for a better alternative
+ */
+export const UsersController = new Elysia({ prefix: "/users/:userId" })
     .derive(() => {
         return {
             db: PGService.getInstance()
@@ -158,55 +161,51 @@ const RegisteredUsersController = new Elysia({ prefix: "/registered/:userId" })
         }),
         body: t.Partial(t.Omit(itemOptionSelectObject, ["created_by", "option_id", "id"]))
     })
-    // 3.1
-    .get("/carts", async ({ params, query, db }) => {
-        await db.getCartDetails(params.userId, query.menu);
-    },{
-        query: t.Object({
-            menu: uuidObject
-        })
-    })
-    // 3.2
-    .post("/carts", async ({ params, body, db }) => {
-        await db.createCart(params.userId, body.menu_id);
-    }, {
-        body: t.Object({
-            menu_id: uuidObject
-        })
-    })
-    // 3.3
-    .get("/carts/:cartId/items", async ({ params, body, db }) => {
-        await db.getItemsInCart(params.cart_id);
-    }, {
-        params: t.Object({
-            cart_id: t.Integer()
-        })
-    })
-    // 3.4
-    .post("/carts/:cartId/items", async ({ params, body, db }) => {
-        await db.addItemToCart(params.cart_id, body.item_id, body.count, body.selections)
-    }, {
-        params: t.Object({
-            cart_id: t.Integer()
-        }),
-        body: t.Object({
-            item_id: t.Integer(),
-            count: t.Integer(),
-            selections: t.Optional(t.Array(t.Number(), { minItems: 1 }))
-        })
-    })
-    // 3.5
-    .delete("/carts/:cartId/items", async ({ params, body, db }) => {
-        await db.updateItemInCartCount(body.cart_item_id, body.count);
-    }, {
-        body: t.Object({
-            cart_item_id: t.Integer(),
-            count: t.Integer(),
-        })
-    })
 
-const GuestUsersController = new Elysia({ prefix: "/guest/:userId" })
-
-export const UsersController = new Elysia({ prefix: "/users" })
-	.use(RegisteredUsersController)
-    .use(GuestUsersController)
+// DEPRECATED carts routes
+    // // 3.1
+    // .get("/carts", async ({ params, query, db }) => {
+    //     await db.getCartDetails(params.userId, query.menu);
+    // },{
+    //     query: t.Object({
+    //         menu: uuidObject
+    //     })
+    // })
+    // // 3.2
+    // .post("/carts", async ({ params, body, db }) => {
+    //     await db.createCart(params.userId, body.menu_id);
+    // }, {
+    //     body: t.Object({
+    //         menu_id: uuidObject
+    //     })
+    // })
+    // // 3.3
+    // .get("/carts/:cartId/items", async ({ params, body, db }) => {
+    //     await db.getItemsInCart(params.cart_id);
+    // }, {
+    //     params: t.Object({
+    //         cart_id: t.Integer()
+    //     })
+    // })
+    // // 3.4
+    // .post("/carts/:cartId/items", async ({ params, body, db }) => {
+    //     await db.addItemToCart(params.cart_id, body.item_id, body.count, body.selections)
+    // }, {
+    //     params: t.Object({
+    //         cart_id: t.Integer()
+    //     }),
+    //     body: t.Object({
+    //         item_id: t.Integer(),
+    //         count: t.Integer(),
+    //         selections: t.Optional(t.Array(t.Number(), { minItems: 1 }))
+    //     })
+    // })
+    // // 3.5
+    // .delete("/carts/:cartId/items", async ({ params, body, db }) => {
+    //     await db.updateItemInCartCount(body.cart_item_id, body.count);
+    // }, {
+    //     body: t.Object({
+    //         cart_item_id: t.Integer(),
+    //         count: t.Integer(),
+    //     })
+    // })

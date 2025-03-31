@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia'
 import {ServiceError} from "./+types/errors";
-import {ApiController} from "./controllers/api.controller";
+import { MenusController } from './controllers/menus.controller'
+import { UsersController } from './controllers/users.controller'
 
 const port = process.env.PORT || 3000
 
@@ -16,7 +17,8 @@ const app = new Elysia()
 				return new Response(error.message, { status: 401 });
 		}
 	})
-	.use(ApiController)
+	.use(MenusController)
+	.use(UsersController)
 	.get('/', () => 'Hello Elysia')
 	.listen(port)
 

@@ -2,57 +2,9 @@
 
 ## 1. Menus
 
-### 1.1 `GET` Menu Details
+### 1.1 `GET` User's Menus
 
-**URL:** `/menus/:menuId`
-
-#### Response
-
-```json
-{
-  "id": UUID,
-  "created_at": Date,
-  "created_by": UUID,
-  "name": string
-}
-```
-
-### 1.2 `GET` Items on Menu
-
-**URL:** `/menus/:menuId/items`
-
-#### Response
-
-```json
-[
-  {
-    "menu_item_id": UUID,
-    "item_id": integer,
-    "created_by": UUID,
-    "name": string,
-    "description": string | null,
-    "img_url": url | null,
-    "base_price": number | null,
-    "options": [
-      {
-        "name": string,
-        "type": "one" | "many" | "text",
-        "selections": [
-          {
-            "label": string,
-            "price": number,
-            "is_default": boolean
-          }
-        ]
-      }
-    ]
-  }
-]
-```
-
-### 1.3 `GET` User's Menus
-
-**URL:** `/users/registered/:userId/menus`
+**URL:** `/menus`
 _Requires registered account._
 
 #### Response
@@ -68,9 +20,9 @@ _Requires registered account._
 ]
 ```
 
-### 1.4 `POST` Create New Menu
+### 1.2 `POST` Create New Menu
 
-**URL:** `/users/registered/:userId/menus`
+**URL:** `/menus`
 _Requires registered account._
 
 #### Request
@@ -92,9 +44,26 @@ _Requires registered account._
 }
 ```
 
-### 1.5 `POST` Add Item to Menu
+### 1.3 `GET` Menu Details
 
-**URL:** `/users/registered/:userId/menus/:menuId/items`
+**URL:** `/menus/:menuId`
+_Requires registered account._
+
+#### Response
+
+```json
+{
+  "id": UUID,
+  "created_at": Date,
+  "created_by": UUID,
+  "name": string,
+  "items": [ number ] // Item ids on menu
+}
+```
+
+### 1.4 `POST` Add Item to Menu
+
+**URL:** `/menus/:menuId/items`
 _Requires registered account._
 
 #### Request
@@ -146,16 +115,16 @@ Option 2: Add existing item by ID
 ]
 ```
 
-### 1.6 `DELETE` Remove Items from Menu
+### 1.5 `DELETE` Remove Items from Menu
 
-**URL:** `/users/registered/:userId/menus/:menuId/items/:menuItemId`
+**URL:** `/menus/:menuId/items/:menuItemId`
 _Requires registered account._
 
 ## 2. Items
 
 ### 2.1 `GET` User's Items
 
-**URL:** `/users/registered/:userId/items`
+**URL:** `/items`
 _Requires registered account._
 
 #### Response
@@ -188,7 +157,7 @@ _Requires registered account._
 
 ### 2.2 `POST` Create New Item
 
-**URL:** `/users/registered/:userId/items`
+**URL:** `/items`
 _Items created this way will not be associated with a menu until imported._
 
 #### Request
@@ -241,14 +210,21 @@ _Items created this way will not be associated with a menu until imported._
 }
 ```
 
-### 2.3 `DELETE` Delete Items
+### 2.3 `DELETE` Delete Item
 
-**URL:** `/users/registered/:userId/items/:itemId`
+**URL:** `/items/`
 _Requires registered account._
+
+#### Request
+```json
+[
+  number // Item ids
+]
+```
 
 ### 2.4 `PUT` Update Item
 
-**URL:** `/users/registered/:userId/items/:itemId`
+**URL:** `/items/:itemId`
 _Requires registered account. Cannot update ID._
 
 #### Request
@@ -275,7 +251,7 @@ _Requires registered account. Cannot update ID._
 
 ### 2.5 `POST` Add Item Option
 
-**URL:** `/users/registered/:userId/items/:itemId/options`
+**URL:** `/items/:itemId/options`
 _Requires registered account._
 
 #### Request
@@ -287,14 +263,21 @@ _Requires registered account._
 }
 ```
 
-### 2.6 `DELETE` Remove Item Option
+### 2.6 `DELETE` Remove Item Options
 
-**URL:** `/users/registered/:userId/menu-items/:itemId/options/:optionId`
-_Requires registered account. No request or response body._
+**URL:** `/items/:itemId/options/`
+_Requires registered account. No response body._
+
+#### Request
+```json
+[
+  number // Option ids
+]
+```
 
 ### 2.7 `PUT` Update Item Option
 
-**URL:** `/users/registered/:userId/menu-items/:itemId/options/:optionId`
+**URL:** `/items/:itemId/options/:optionId`
 _Requires registered account. Only updates defined fields._
 
 #### Request
@@ -308,13 +291,14 @@ _Requires registered account. Only updates defined fields._
 
 ### 2.8 `POST` Add Option Selection
 
-**URL:** `/users/registered/:userId/items/:itemId/options/:optionId/selections`
+**URL:** `/items/:itemId/selections`
 _Requires registered account. Fails if parent option type is "text"._
 
 #### Request
 
 ```json
 {
+  "parent_option": number | undefined,
   "label": string,
   "price": number,
   "is_default": boolean
@@ -334,20 +318,28 @@ _Requires registered account. Fails if parent option type is "text"._
 }
 ```
 
-### 2.9 `DELETE` Remove Option Selection
+### 2.9 `DELETE` Remove Selections
 
-**URL:** `/users/registered/:userId/items/:itemId/options/:optionId/selections/:selectionLabel`
-_Requires registered account. No request or response body._
+**URL:** `/items/:itemId/selections`
+_Requires registered account. No response body._
 
-### 2.10 `PUT` Update Option Selection
+#### Request
+```json
+[
+  number // Selection ids
+]
+```
 
-**URL:** `/users/registered/:userId/items/:itemId/options/:optionId/selections/:selectionLabel`
+### 2.10 `PUT` Update Selection
+
+**URL:** `/items/:itemId/selections/:selId`
 _Requires registered account. Only updates defined fields._
 
 #### Request
 
 ```json
 {
+  "parent_option": number | undefined,
   "label": string | undefined,
   "price": number | undefined,
   "is_default": boolean | undefined
@@ -367,11 +359,65 @@ _Requires registered account. Only updates defined fields._
 }
 ```
 
-## 3. Carts
+## 3. Orders
 
-### 3.1 `GET` Cart Details
+### 3.1 `GET` all Orders for a session.
+**URL:** `orders/:sessId`
 
-**URL:** `/users/registered/:userId/carts?menu`
+### 3.2 `POST` request new Order for a session.
+**URL:** `orders/:sessId`
+
+#### Request
+
+```json
+{
+  "guest_name": string,
+  "placed_at": timestamp,
+  "order_cost": number,
+  "items": [
+    {
+      "item_id": number, // references item on menu
+      "selections": [ number ] // references selections made on that item
+      "count": number
+    },
+    ...
+  ]
+}
+```
+
+#### Response
+_A 200 level response indicated that the order has been received and placed. Anything else means an error has occured._
+
+
+### 3.3 `DELETE` cancel an Order.
+**URL:** `/orders/:sessId/:orderId`
+_Cancels the placed order. Must be done by the session admin. No request/response bodies._
+
+## 4. Sessions
+
+### 4.1 `POST` create new Session
+**URL:** `sessions/`
+_Registered user must be owner of the menu_
+#### Request
+```json
+{
+  "menu_id": UUID,
+  "session_admins": [ UUID ], // list of users with ability to manage orders on session.
+  "end_time": Date // time for session to automatically close at. -1 leaves session open until manually closed.
+}
+```
+
+### 4.2 `DELETE` close Session.
+**URL:** `sessions/:sessId`
+_Registered user must be session admin._
+
+
+## Deprecated
+### #. Carts
+
+### #.1 `GET` Cart Details
+
+**URL:** `/users/:userId/carts?menu`
 
 #### Response
 
@@ -391,10 +437,9 @@ _Requires registered account. Only updates defined fields._
 }
 ```
 
-### 3.2 `POST` Create New Cart
+### #.2 `POST` Create New Cart
 
-**URL:** `/users/registered/:userId/carts`
-_For guest users: `/users/guests/:guestName/carts`_
+**URL:** `/users/:userId/carts`
 
 #### Request
 
@@ -416,10 +461,9 @@ _For guest users: `/users/guests/:guestName/carts`_
 }
 ```
 
-### 3.3 `GET` Cart Items
+### #.3 `GET` Cart Items
 
-**URL:** `/users/registered/:userId/carts/:cartId/items`
-_For guest users: `/users/guests/:guestName/carts/:cartId/items`_
+**URL:** `/users/:userId/carts/:cartId/items`
 
 #### Response
 
@@ -449,10 +493,9 @@ _For guest users: `/users/guests/:guestName/carts/:cartId/items`_
 ]
 ```
 
-### 3.4 `POST` Add Items to Cart
+### #.4 `POST` Add Items to Cart
 
-**URL:** `/users/registered/:userId/carts/:cartId/items`
-_For guest users: `/users/guests/:guestName/carts/:cartId/items`_
+**URL:** `/users/:userId/carts/:cartId/items`
 
 #### Request
 
@@ -505,10 +548,9 @@ _For guest users: `/users/guests/:guestName/carts/:cartId/items`_
 ]
 ```
 
-### 3.5 `DELETE` Remove Items from Cart
+### #.5 `DELETE` Remove Items from Cart
 
-**URL:** `/users/registered/:userId/carts/:cartId/items`
-_For guest users: `/users/guests/:guestName/carts/:cartId/items`_
+**URL:** `/users/:userId/carts/:cartId/items`
 
 #### Request
 
