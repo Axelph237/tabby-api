@@ -1,7 +1,14 @@
 import { Elysia } from "elysia";
 import { oauth2 } from "elysia-oauth2";
+import { dbConnectionUri } from '../database'
+import { SQL } from 'bun'
 
 export const AuthController = new Elysia()
+	.derive(() => {
+		return {
+			pool: new SQL(dbConnectionUri)
+		}
+	})
 	.use(
 		oauth2({
 			Google: [
@@ -23,5 +30,13 @@ export const AuthController = new Elysia()
 		const accessToken = tokens.accessToken();
 
 		// send request to API with token
-		console.log(accessToken);
+		console.log({
+			data: {
+				access_token: tokens.accessToken(),
+				expires_in: tokens.accessTokenExpiresInSeconds(),
+				scope: tokens.scopes(),
+				token_type: tokens.tokenType(),
+				id_token: tokens.idToken()
+			}
+		});
 	})

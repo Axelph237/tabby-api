@@ -20,21 +20,16 @@ import {
 	cartItemDetailsObject
 } from '../schemas/schema.interfaces'
 import { ServiceError } from '../+types/errors'
+import { dbConnectionUri } from '../database'
 
-const pgUser = process.env.PG_USER ?? 'postgres'
-const pgPassword = process.env.PG_PASSWORD ?? 'postgres'
-const pgHost = process.env.PG_HOST ?? 'localhost:5532'
-const pgDatabase = process.env.PG_DATABASE ?? 'postgres'
-const connectionUri = `postgresql://${pgUser}:${pgPassword}@${pgHost}/${pgDatabase}`
 // Service garbage collection if module closes
 const registry = new FinalizationRegistry((db: SQL) => db.close())
-
 export class PGService {
 	private static instance: PGService
 	private readonly db: SQL
 
 	private constructor() {
-		this.db = new SQL(connectionUri);
+		this.db = new SQL(dbConnectionUri);
 
 		this.db.connect().then((db) => {
 			console.log('[PGService] Connected to database.')
