@@ -64,7 +64,7 @@ export async function setupTestDatabase() {
 	}
 
 	child_process.execSync(
-		'psql -U postgres -h localhost -p 5432 -d test_db -c "\\i ./schema.sql"'
+		'psql -U postgres -h localhost -p 5432 -d test_db -c "\\i ./public.schema.sql"'
 	)
 
 	await insertTestData()

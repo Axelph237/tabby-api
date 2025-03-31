@@ -6,7 +6,7 @@ import {
     itemOptionSelectObject,
     menuObject,
     uuidObject
-} from "../schema/schema.interfaces";
+} from "../schemas/schema.interfaces";
 import {Value} from "@sinclair/typebox/value";
 
 /**

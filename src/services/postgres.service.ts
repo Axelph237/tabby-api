@@ -18,7 +18,7 @@ import {
 	CartItemDetails,
 	cartDetailsObject,
 	cartItemDetailsObject
-} from '../schema/schema.interfaces'
+} from '../schemas/schema.interfaces'
 import { ServiceError } from '../+types/errors'
 
 const pgUser = process.env.PG_USER ?? 'postgres'

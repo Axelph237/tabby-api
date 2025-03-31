@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import {PGService} from "../services/postgres.service";
-import { uuidObject } from '../schema/schema.interfaces'
+import { uuidObject } from '../schemas/schema.interfaces'
 
 export const MenusController = new Elysia({ prefix: '/menus' })
 	.derive(() => {
