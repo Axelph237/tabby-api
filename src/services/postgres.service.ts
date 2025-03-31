@@ -34,7 +34,7 @@ export class PGService {
 	private readonly db: SQL
 
 	private constructor() {
-		this.db = new SQL(connectionUri)
+		this.db = new SQL(connectionUri);
 
 		this.db.connect().then((db) => {
 			console.log('[PGService] Connected to database.')

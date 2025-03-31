@@ -7,8 +7,10 @@
 		"build": "bun build ./src/index.ts --target=bun"
 	},
 	"dependencies": {
-		"better-auth": "^1.2.5",
+		"arctic": "^3.6.0",
+		"bun": "^1.2.7",
 		"elysia": "latest",
+		"elysia-oauth2": "^2.0.0",
 		"prettier": "^3.5.3"
 	},
 	"devDependencies": {
