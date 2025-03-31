@@ -20,16 +20,23 @@ SET row_security = off;
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
+
+--
+-- Roles
+--
+
 CREATE OR REPLACE ROLE db_superuser SUPERUSER;
 CREATE OR REPLACE ROLE db_admin WITH LOGIN PASSWORD 'db_admin';
 
 CREATE OR REPLACE ROLE db_owner WITH LOGIN PASSWORD 'db_owner_tabby';
 GRANT db_superuser TO db_owner;
 
+
 --
--- Name: get_cart_details(integer); Type: FUNCTION; Schema: public; Owner: db_owner
+-- Functions
 --
 
+-- Name: get_cart_details(integer); Type: FUNCTION; Schema: public; Owner: db_owner
 CREATE OR REPLACE FUNCTION public.get_cart_details(p_user_id uuid, p_menu_id uuid)
     RETURNS TABLE(
         id integer,
@@ -69,10 +76,8 @@ BEGIN
 END;
 $$;
 
---
--- Name: get_cart_items(integer); Type: FUNCTION; Schema: public; Owner: db_owner
---
 
+-- Name: get_cart_items(integer); Type: FUNCTION; Schema: public; Owner: db_owner
 CREATE OR REPLACE FUNCTION public.get_cart_items(p_cart_id integer)
     RETURNS TABLE(
         cart_item_id integer,
@@ -127,10 +132,8 @@ BEGIN
 END;
 $$;
 
---
--- Name: get_menus_to_items(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
---
 
+-- Name: get_menus_to_items(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
 CREATE OR REPLACE FUNCTION public.get_items_from_menu(p_menu_id uuid)
     RETURNS TABLE(
         id integer,
@@ -158,14 +161,10 @@ CREATE OR REPLACE FUNCTION public.get_items_from_menu(p_menu_id uuid)
     JOIN menus_to_items_ref ON menus_to_items_ref.item_id = user_items.id;
   END;
 $$;
+ALTER FUNCTION public.get_menus_to_items(p_menu_id uuid) OWNER TO db_owner;
 
 
---ALTER FUNCTION public.get_menus_to_items(p_menu_id uuid) OWNER TO db_owner;
-
---
 -- Name: get_user_items(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
---
-
 CREATE OR REPLACE FUNCTION public.get_user_items(p_user_id uuid)
     RETURNS TABLE(
         id integer,
@@ -227,28 +226,25 @@ FROM user_items
 LEFT JOIN option_objs ON option_objs.item_id = user_items.id;
 END;
 $$;
+ALTER FUNCTION public.get_user_items(p_user_id uuid) OWNER TO db_owner;
 
 
---ALTER FUNCTION public.get_user_items(p_user_id uuid) OWNER TO db_owner;
-
+--
+-- Tables
+--
 SET default_tablespace = '';
-
 SET default_table_access_method = heap;
 
---
--- Name: cart_item_selections; Type: TABLE; Schema: public; Owner: db_owner
---
 
+-- Name: cart_item_selections; Type: TABLE; Schema: public; Owner: db_owner
 CREATE TABLE public.cart_item_selections (
     cart_item_id integer NOT NULL,
     option_selection integer NOT NULL,
     PRIMARY KEY (cart_item_id, option_selection)
 );
 
---
--- Name: cart_items; Type: TABLE; Schema: public; Owner: db_owner
---
 
+-- Name: cart_items; Type: TABLE; Schema: public; Owner: db_owner
 CREATE TABLE public.cart_items (
     id serial NOT NULL,
     cart_id integer NOT NULL,
@@ -259,10 +255,8 @@ CREATE TABLE public.cart_items (
 );
 ALTER TABLE public.cart_items OWNER TO db_owner;
 
---
--- Name: carts; Type: TABLE; Schema: public; Owner: db_owner
---
 
+-- Name: carts; Type: TABLE; Schema: public; Owner: db_owner
 CREATE TABLE public.carts (
     id serial NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -274,10 +268,7 @@ CREATE TABLE public.carts (
 ALTER TABLE public.carts OWNER TO db_owner;
 
 
---
 -- Name: item_option_selections; Type: TABLE; Schema: public; Owner: db_owner
---
-
 CREATE TABLE public.item_option_selections (
     id serial NOT NULL,
     option_id integer NOT NULL,
@@ -291,10 +282,7 @@ CREATE TABLE public.item_option_selections (
 ALTER TABLE public.item_option_selections OWNER TO db_owner;
 
 
---
 -- Name: item_options; Type: TABLE; Schema: public; Owner: db_owner
---
-
 CREATE TABLE public.item_options (
     id serial NOT NULL,
     label text NOT NULL,
@@ -308,10 +296,7 @@ CREATE TABLE public.item_options (
 ALTER TABLE public.item_options OWNER TO db_owner;
 
 
---
 -- Name: items; Type: TABLE; Schema: public; Owner: db_owner
---
-
 CREATE TABLE public.items (
     id serial NOT NULL,
     created_at date DEFAULT now(),
@@ -325,10 +310,7 @@ CREATE TABLE public.items (
 ALTER TABLE public.items OWNER TO db_owner;
 
 
---
 -- Name: menus_to_items; Type: TABLE; Schema: public; Owner: db_owner
---
-
 CREATE TABLE public.menus_to_items (
     item_id integer NOT NULL,
     menu_id uuid NOT NULL,
@@ -336,10 +318,8 @@ CREATE TABLE public.menus_to_items (
 );
 ALTER TABLE public.menus_to_items OWNER TO db_owner;
 
---
--- Name: menus; Type: TABLE; Schema: public; Owner: db_owner
---
 
+-- Name: menus; Type: TABLE; Schema: public; Owner: db_owner
 CREATE TABLE public.menus (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -385,179 +365,28 @@ ALTER TABLE ONLY public.menus_to_items
     ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
 ALTER TABLE ONLY public.menus_to_items
     ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id);
---
--- Name: items id; Type: DEFAULT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.items ALTER COLUMN id SET DEFAULT nextval('public.items_id_seq'::regclass);
 
 
 --
--- Name: cart_item_selections cart_item_selections_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
+-- Indexes
 --
 
--- ALTER TABLE ONLY public.cart_item_selections
---     ADD CONSTRAINT cart_item_selections_pkey PRIMARY KEY (id);
-
-
---
--- Name: cart_items cart_items_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.cart_items
---     ADD CONSTRAINT cart_items_pkey PRIMARY KEY (id);
-
-
---
--- Name: carts carts_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.carts
---     ADD CONSTRAINT carts_pkey PRIMARY KEY (id);
-
-
---
--- Name: item_option_selections item_option_selections_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.item_option_selections
---     ADD CONSTRAINT item_option_selections_pkey PRIMARY KEY (id);
-
-
---
--- Name: item_options item_options_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.item_options
---     ADD CONSTRAINT item_options_pkey PRIMARY KEY (id);
-
-
---
--- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.items
---     ADD CONSTRAINT items_pkey PRIMARY KEY (id);
-
-
---
--- Name: menus_to_items menus_to_items_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.menus_to_items
---     ADD CONSTRAINT menus_to_items_pkey PRIMARY KEY (item_id, menu_id);
-
-
---
--- Name: menus menu_pkey; Type: CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.menus
---     ADD CONSTRAINT menu_pkey PRIMARY KEY (id);
-
-
---
 -- Name: item_option_selections_created_by_hash; Type: INDEX; Schema: public; Owner: db_owner
---
-
 CREATE INDEX item_option_selections_created_by_hash ON public.item_option_selections USING hash (created_by);
 
-
---
 -- Name: item_options_created_by_hash; Type: INDEX; Schema: public; Owner: db_owner
---
-
 CREATE INDEX item_options_created_by_hash ON public.item_options USING hash (created_by);
 
-
---
 -- Name: items_created_by_hash; Type: INDEX; Schema: public; Owner: db_owner
---
-
 CREATE INDEX items_created_by_hash ON public.items USING hash (created_by);
 
 
 --
--- Name: cart_items cart_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
+-- Privileges
 --
 
--- ALTER TABLE ONLY public.cart_items
---     ADD CONSTRAINT cart_id_fkey FOREIGN KEY (cart_id) REFERENCES public.carts(id);
-
-
---
--- Name: cart_item_selections cart_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.cart_item_selections
---     ADD CONSTRAINT cart_item_id_fkey FOREIGN KEY (cart_item_id) REFERENCES public.cart_items(id);
-
-
---
--- Name: carts carts_menu_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.carts
---     ADD CONSTRAINT carts_menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: item_options item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.item_options
---     ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: menus_to_items item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.menus_to_items
---     ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
-
-
---
--- Name: cart_items item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.cart_items
---     ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
-
-
---
--- Name: item_option_selections option_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.item_option_selections
---     ADD CONSTRAINT option_id_fkey FOREIGN KEY (option_id) REFERENCES public.item_options(id);
-
-
---
--- Name: menus_to_items menu_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.menus_to_items
---     ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: cart_item_selections option_selection_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_owner
---
-
--- ALTER TABLE ONLY public.cart_item_selections
---     ADD CONSTRAINT option_selection_fkey FOREIGN KEY (option_selection) REFERENCES public.item_option_selections(id);
-
-
---
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: db_admin
---
-
 ALTER DEFAULT PRIVILEGES FOR ROLE db_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO db_superuser WITH GRANT OPTION;
 
-
---
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: db_admin
---
-
 ALTER DEFAULT PRIVILEGES FOR ROLE db_admin IN SCHEMA public GRANT ALL ON TABLES TO db_superuser WITH GRANT OPTION;
