@@ -36,6 +36,7 @@ GRANT db_superuser TO db_owner;
 -- Functions
 --
 
+-- DEPRECATED
 -- Name: get_cart_details(integer); Type: FUNCTION; Schema: public; Owner: db_owner
 CREATE OR REPLACE FUNCTION public.get_cart_details(p_user_id uuid, p_menu_id uuid)
     RETURNS TABLE(
@@ -77,6 +78,7 @@ END;
 $$;
 
 
+-- DEPRECATED
 -- Name: get_cart_items(integer); Type: FUNCTION; Schema: public; Owner: db_owner
 CREATE OR REPLACE FUNCTION public.get_cart_items(p_cart_id integer)
     RETURNS TABLE(
