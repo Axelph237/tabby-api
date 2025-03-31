@@ -20,10 +20,10 @@ SET row_security = off;
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
-CREATE ROLE db_superuser SUPERUSER;
-CREATE ROLE db_admin WITH LOGIN PASSWORD 'db_admin';
+CREATE OR REPLACE ROLE db_superuser SUPERUSER;
+CREATE OR REPLACE ROLE db_admin WITH LOGIN PASSWORD 'db_admin';
 
-CREATE ROlE db_owner WITH LOGIN PASSWORD 'db_owner_tabby';
+CREATE OR REPLACE ROLE db_owner WITH LOGIN PASSWORD 'db_owner_tabby';
 GRANT db_superuser TO db_owner;
 
 --
