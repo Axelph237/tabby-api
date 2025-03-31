@@ -20,8 +20,11 @@ SET row_security = off;
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
--- CREATE ROLE db_superuser SUPERUSER;
--- CREATE ROLE db_admin;
+CREATE ROLE db_superuser SUPERUSER;
+CREATE ROLE db_admin WITH LOGIN PASSWORD 'db_admin';
+
+CREATE ROlE db_owner WITH LOGIN PASSWORD 'db_owner_tabby';
+GRANT db_superuser TO db_owner;
 
 --
 -- Name: get_cart_details(integer); Type: FUNCTION; Schema: public; Owner: db_owner
@@ -252,7 +255,7 @@ CREATE TABLE public.cart_items (
     item_id integer NOT NULL,
     count integer,
     unit_price integer NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (id)
 );
 ALTER TABLE public.cart_items OWNER TO db_owner;
 
