@@ -5,9 +5,9 @@ export const AuthController = new Elysia()
 	.use(
 		oauth2({
 			Google: [
-				"clientID",
-				"clientSecret",
-				"https://example.com/auth/google/callback",
+				process.env.GOOGLE_CLIENT_ID!,
+				process.env.GOOGLE_CLIENT_SECRET!,
+				process.env.ORIGIN + "/auth/google/callback",
 			],
 		})
 	)
