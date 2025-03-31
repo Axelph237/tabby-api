@@ -5,7 +5,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 CREATE TABLE auth.user (
-    id text NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text NOT NULL,
     email text NOT NULL,
     emailVerified boolean NOT NULL,
@@ -14,11 +14,11 @@ CREATE TABLE auth.user (
     updatedAt timestamp NOT NULL,
     PRIMARY KEY (id)
 );
-ALTER TABLE auth.user OWNER TO db_owner;
+ALTER TABLE auth.user OWNER TO neondb_owner;
 
 CREATE TABLE auth.account (
-    id text NOT NULL,
-    userId text NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    userId uuid NOT NULL,
     accountId text NOT NULL,
     providerId text NOT NULL,
     accessToken text,
@@ -31,7 +31,7 @@ CREATE TABLE auth.account (
     updatedAt timestamp NOT NULL,
     PRIMARY KEY (id)
 );
-ALTER TABLE auth.account OWNER TO db_owner;
+ALTER TABLE auth.account OWNER TO neondb_owner;
 
 
 --

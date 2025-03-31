@@ -25,11 +25,11 @@ CREATE SCHEMA public;
 -- Roles
 --
 
-CREATE OR REPLACE ROLE db_superuser SUPERUSER;
-CREATE OR REPLACE ROLE db_admin WITH LOGIN PASSWORD 'db_admin';
+CREATE OR REPLACE ROLE neondb_superuser SUPERUSER;
+CREATE OR REPLACE ROLE neondb_admin WITH LOGIN PASSWORD 'neondb_admin';
 
-CREATE OR REPLACE ROLE db_owner WITH LOGIN PASSWORD 'db_owner_tabby';
-GRANT db_superuser TO db_owner;
+CREATE OR REPLACE ROLE neondb_owner WITH LOGIN PASSWORD 'neondb_owner_tabby';
+GRANT neondb_superuser TO neondb_owner;
 
 
 --
@@ -37,7 +37,7 @@ GRANT db_superuser TO db_owner;
 --
 
 -- DEPRECATED
--- Name: getCartDetails(integer); Type: FUNCTION; Schema: public; Owner: db_owner
+-- Name: getCartDetails(integer); Type: FUNCTION; Schema: public; Owner: neondb_owner
 CREATE OR REPLACE FUNCTION public.getCartDetails(p_userId uuid, p_menuId uuid)
     RETURNS TABLE(
         id integer,
@@ -79,7 +79,7 @@ $$;
 
 
 -- DEPRECATED
--- Name: getCartItems(integer); Type: FUNCTION; Schema: public; Owner: db_owner
+-- Name: getCartItems(integer); Type: FUNCTION; Schema: public; Owner: neondb_owner
 CREATE OR REPLACE FUNCTION public.getCartItems(p_cartId integer)
     RETURNS TABLE(
         cartItemId integer,
@@ -135,7 +135,7 @@ END;
 $$;
 
 
--- Name: get_itemsToMenus(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
+-- Name: get_itemsToMenus(uuid); Type: FUNCTION; Schema: public; Owner: neondb_owner
 CREATE OR REPLACE FUNCTION public.getItemsFromMenu(p_menuId uuid)
     RETURNS TABLE(
         id integer,
@@ -163,10 +163,10 @@ CREATE OR REPLACE FUNCTION public.getItemsFromMenu(p_menuId uuid)
     JOIN itemsToMenus_ref ON itemsToMenus_ref.itemId = userItems.id;
   END;
 $$;
-ALTER FUNCTION public.get_itemsToMenus(p_menuId uuid) OWNER TO db_owner;
+ALTER FUNCTION public.get_itemsToMenus(p_menuId uuid) OWNER TO neondb_owner;
 
 
--- Name: getUserItems(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
+-- Name: getUserItems(uuid); Type: FUNCTION; Schema: public; Owner: neondb_owner
 CREATE OR REPLACE FUNCTION public.getUserItems(p_userId uuid)
     RETURNS TABLE(
         id integer,
@@ -228,7 +228,7 @@ FROM userItems
 LEFT JOIN optionObjs ON optionObjs.itemId = userItems.id;
 END;
 $$;
-ALTER FUNCTION public.getUserItems(p_userId uuid) OWNER TO db_owner;
+ALTER FUNCTION public.getUserItems(p_userId uuid) OWNER TO neondb_owner;
 
 
 --
@@ -280,7 +280,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 
--- Name: cartItemSelections; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: cartItemSelections; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.cartItemSelections (
     cartItemId integer NOT NULL,
     optionSelection integer NOT NULL,
@@ -288,7 +288,7 @@ CREATE TABLE public.cartItemSelections (
 );
 
 
--- Name: cartItems; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: cartItems; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.cartItems (
     id serial NOT NULL,
     cartId integer NOT NULL,
@@ -297,10 +297,10 @@ CREATE TABLE public.cartItems (
     unitPrice integer NOT NULL,
     PRIMARY KEY (id)
 );
-ALTER TABLE public.cartItems OWNER TO db_owner;
+ALTER TABLE public.cartItems OWNER TO neondb_owner;
 
 
--- Name: carts; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: carts; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.carts (
     id serial NOT NULL,
     createdAt timestamp with time zone DEFAULT now() NOT NULL,
@@ -309,10 +309,10 @@ CREATE TABLE public.carts (
     PRIMARY KEY (id),
     UNIQUE (createdBy, menuId)
 );
-ALTER TABLE public.carts OWNER TO db_owner;
+ALTER TABLE public.carts OWNER TO neondb_owner;
 
 
--- Name: itemOptionSelections; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: itemOptionSelections; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.itemOptionSelections (
     id serial NOT NULL,
     optionId integer NOT NULL,
@@ -323,10 +323,10 @@ CREATE TABLE public.itemOptionSelections (
     PRIMARY KEY (id),
     UNIQUE (optionId, label)
 );
-ALTER TABLE public.itemOptionSelections OWNER TO db_owner;
+ALTER TABLE public.itemOptionSelections OWNER TO neondb_owner;
 
 
--- Name: itemOptions; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: itemOptions; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.itemOptions (
     id serial NOT NULL,
     label text NOT NULL,
@@ -337,10 +337,10 @@ CREATE TABLE public.itemOptions (
     UNIQUE (itemId, label),
     CONSTRAINT typeValid CHECK ((type = ANY (ARRAY['one'::text, 'many'::text, 'text'::text])))
 );
-ALTER TABLE public.itemOptions OWNER TO db_owner;
+ALTER TABLE public.itemOptions OWNER TO neondb_owner;
 
 
--- Name: items; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: items; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.items (
     id serial NOT NULL,
     createdAt date DEFAULT now(),
@@ -351,19 +351,19 @@ CREATE TABLE public.items (
     createdBy uuid,
     PRIMARY KEY (id)
 );
-ALTER TABLE public.items OWNER TO db_owner;
+ALTER TABLE public.items OWNER TO neondb_owner;
 
 
--- Name: itemsToMenus; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: itemsToMenus; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.itemsToMenus (
     itemId integer NOT NULL,
     menuId uuid NOT NULL,
     PRIMARY KEY (itemId, menuId)
 );
-ALTER TABLE public.itemsToMenus OWNER TO db_owner;
+ALTER TABLE public.itemsToMenus OWNER TO neondb_owner;
 
 
--- Name: menus; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: menus; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.menus (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     createdAt timestamp with time zone DEFAULT now() NOT NULL,
@@ -371,17 +371,17 @@ CREATE TABLE public.menus (
     name text NOT NULL,
     PRIMARY KEY (id)
 );
-ALTER TABLE public.menus OWNER TO db_owner;
+ALTER TABLE public.menus OWNER TO neondb_owner;
 
 
--- Name: sessions; Type: TABLE; Schema: public; Owner: db_owner
+-- Name: sessions; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.sessions (
     id serial NOT NULL,
     menuId uuid NOT NULL,
     expires timestamp with time zone,
     PRIMARY KEY (id)
 );
-ALTER TABLE public.sessions OWNER TO db_owner;
+ALTER TABLE public.sessions OWNER TO neondb_owner;
 
 
 -- Name: orders
@@ -393,7 +393,7 @@ CREATE TABLE public.orders (
     totalCost integer DEFAULT 0 NOT NULL,
     PRIMARY KEY (id)
 );
-ALTER TABLE public.orders OWNER TO db_owner;
+ALTER TABLE public.orders OWNER TO neondb_owner;
 
 CREATE TRIGGER beforeInsertSetOrderNum
     BEFORE INSERT ON public.orders FOR EACH ROW EXECUTE FUNCTION public.setOrderNum();
@@ -409,7 +409,7 @@ CREATE TABLE public.orderLineItems (
     selections integer[],
     PRIMARY KEY (id)
 );
-ALTER TABLE public.orderLineItems OWNER TO db_owner;
+ALTER TABLE public.orderLineItems OWNER TO neondb_owner;
 
 CREATE TRIGGER beforeInsertSetUnitPrice
     BEFORE INSERT ON public.orderLineItems FOR EACH ROW EXECUTE FUNCTION public.setUnitPrice();
@@ -461,13 +461,13 @@ ALTER TABLE ONLY public.sessions
 -- Indexes
 --
 
--- Name: itemOptionSelections_createdBy_hash; Type: INDEX; Schema: public; Owner: db_owner
+-- Name: itemOptionSelections_createdBy_hash; Type: INDEX; Schema: public; Owner: neondb_owner
 CREATE INDEX itemOptionSelections_createdBy_hash ON public.itemOptionSelections USING hash (createdBy);
 
--- Name: itemOptions_createdBy_hash; Type: INDEX; Schema: public; Owner: db_owner
+-- Name: itemOptions_createdBy_hash; Type: INDEX; Schema: public; Owner: neondb_owner
 CREATE INDEX itemOptions_createdBy_hash ON public.itemOptions USING hash (createdBy);
 
--- Name: items_createdBy_hash; Type: INDEX; Schema: public; Owner: db_owner
+-- Name: items_createdBy_hash; Type: INDEX; Schema: public; Owner: neondb_owner
 CREATE INDEX items_createdBy_hash ON public.items USING hash (createdBy);
 
 
@@ -475,8 +475,8 @@ CREATE INDEX items_createdBy_hash ON public.items USING hash (createdBy);
 -- Privileges
 --
 
--- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: db_admin
-ALTER DEFAULT PRIVILEGES FOR ROLE db_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO db_superuser WITH GRANT OPTION;
+-- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: neondb_admin
+ALTER DEFAULT PRIVILEGES FOR ROLE neondb_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO neondb_superuser WITH GRANT OPTION;
 
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: db_admin
-ALTER DEFAULT PRIVILEGES FOR ROLE db_admin IN SCHEMA public GRANT ALL ON TABLES TO db_superuser WITH GRANT OPTION;
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: neondb_admin
+ALTER DEFAULT PRIVILEGES FOR ROLE neondb_admin IN SCHEMA public GRANT ALL ON TABLES TO neondb_superuser WITH GRANT OPTION;
