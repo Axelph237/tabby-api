@@ -133,7 +133,7 @@ END;
 $$;
 
 
--- Name: get_menus_to_items(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
+-- Name: get_items_to_menus(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
 CREATE OR REPLACE FUNCTION public.get_items_from_menu(p_menu_id uuid)
     RETURNS TABLE(
         id integer,
@@ -151,17 +151,17 @@ CREATE OR REPLACE FUNCTION public.get_items_from_menu(p_menu_id uuid)
       FROM menus
       WHERE menus.id = p_menu_id
       LIMIT 1
-    ), menus_to_items_ref AS (
-      SELECT menus_to_items.item_id
-      FROM menus_to_items
-      WHERE menus_to_items.menu_id = p_menu_id
+    ), items_to_menus_ref AS (
+      SELECT items_to_menus.item_id
+      FROM items_to_menus
+      WHERE items_to_menus.menu_id = p_menu_id
     )
     SELECT user_items.id, user_items.name, user_items.description, user_items.img_url, user_items.base_price, user_items.options
     FROM get_user_items((SELECT user_id FROM menu_ref)) AS user_items
-    JOIN menus_to_items_ref ON menus_to_items_ref.item_id = user_items.id;
+    JOIN items_to_menus_ref ON items_to_menus_ref.item_id = user_items.id;
   END;
 $$;
-ALTER FUNCTION public.get_menus_to_items(p_menu_id uuid) OWNER TO db_owner;
+ALTER FUNCTION public.get_items_to_menus(p_menu_id uuid) OWNER TO db_owner;
 
 
 -- Name: get_user_items(uuid); Type: FUNCTION; Schema: public; Owner: db_owner
@@ -310,13 +310,13 @@ CREATE TABLE public.items (
 ALTER TABLE public.items OWNER TO db_owner;
 
 
--- Name: menus_to_items; Type: TABLE; Schema: public; Owner: db_owner
-CREATE TABLE public.menus_to_items (
+-- Name: items_to_menus; Type: TABLE; Schema: public; Owner: db_owner
+CREATE TABLE public.items_to_menus (
     item_id integer NOT NULL,
     menu_id uuid NOT NULL,
     PRIMARY KEY (item_id, menu_id)
 );
-ALTER TABLE public.menus_to_items OWNER TO db_owner;
+ALTER TABLE public.items_to_menus OWNER TO db_owner;
 
 
 -- Name: menus; Type: TABLE; Schema: public; Owner: db_owner
@@ -360,10 +360,10 @@ ALTER TABLE ONLY public.item_option_selections
 ALTER TABLE ONLY public.item_options
     ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
--- Table: public.menus_to_items
-ALTER TABLE ONLY public.menus_to_items
+-- Table: public.items_to_menus
+ALTER TABLE ONLY public.items_to_menus
     ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
-ALTER TABLE ONLY public.menus_to_items
+ALTER TABLE ONLY public.items_to_menus
     ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id);
 
 
