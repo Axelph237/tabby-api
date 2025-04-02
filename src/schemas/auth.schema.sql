@@ -8,28 +8,28 @@ CREATE TABLE auth.user (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text NOT NULL,
     email text NOT NULL,
-    emailVerified boolean NOT NULL,
+    email_verified boolean NOT NULL,
     image text,
-    createdAt timestamp NOT NULL,
-    updatedAt timestamp NOT NULL,
+    created_at timestamp DEFAULT now() NOT NULL,
+    updated_at timestamp DEFAULT now() NOT NULL,
     PRIMARY KEY (id)
 );
 ALTER TABLE auth.user OWNER TO neondb_owner;
 
 CREATE TABLE auth.account (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
-    userId uuid NOT NULL,
-    accountId text NOT NULL,
-    providerId text NOT NULL,
-    accessToken text,
-    refreshToken text,
-    accessTokenExpiresAt timestamp,
-    refreshTokenExpiresAt timestamp,
+    user_id uuid NOT NULL,
+    provider_id text NOT NULL,
+    access_token text,
+    refresh_token text,
+    access_token_expires_at timestamp,
+    refresh_token_expires_at timestamp,
     scope text,
-    idToken text,
-    createdAt timestamp NOT NULL,
-    updatedAt timestamp NOT NULL,
-    PRIMARY KEY (id)
+    id_token text,
+    created_at timestamp DEFAULT now() NOT NULL,
+    updated_at timestamp DEFAULT now() NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (user_id, provider_id)
 );
 ALTER TABLE auth.account OWNER TO neondb_owner;
 
@@ -39,4 +39,4 @@ ALTER TABLE auth.account OWNER TO neondb_owner;
 --
 
 ALTER TABLE ONLY auth.account
-    ADD CONSTRAINT userId_fkey FOREIGN KEY (userId) REFERENCES auth.user(id);
+    ADD CONSTRAINT user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.user(id);
