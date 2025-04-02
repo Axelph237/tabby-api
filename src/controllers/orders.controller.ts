@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { uuidObject } from '../schemas/schema.interfaces'
+import { uuidObject } from '../+types/schema'
 import { PGService } from '../services/postgres.service'
 
 export const OrdersController = new Elysia({ prefix: "/orders" })

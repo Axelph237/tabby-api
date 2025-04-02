@@ -18,7 +18,7 @@ import {
 	CartItemDetails,
 	cartDetailsObject,
 	cartItemDetailsObject
-} from '../schemas/schema.interfaces'
+} from '../+types/schema'
 import { ServiceError } from '../+types/errors'
 import { dbConnectionUri } from '../database'
 

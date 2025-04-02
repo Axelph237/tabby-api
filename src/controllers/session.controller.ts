@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { PGService } from '../services/postgres.service'
-import { uuidObject } from '../schemas/schema.interfaces'
+import { uuidObject } from '../+types/schema'
 
 export const SessionController = new Elysia({ prefix: "/sessions" })
 	.derive(() => {
