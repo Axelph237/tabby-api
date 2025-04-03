@@ -248,12 +248,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Name: update_order_cost()
-CREATE OR REPLACE FUNCTION public.update_order_cost()
+-- Name: update_order_data()
+CREATE OR REPLACE FUNCTION public.update_order_data()
 RETURNS TRIGGER AS $$
 BEGIN
   UPDATE public.orders AS o
-  SET total_cost = total_cost + (NEW.unit_price * NEW.count)
+  SET total_cost = total_cost + (NEW.unit_price * NEW.count),
+      total_items = total_items + (NEW.count)
   WHERE o.id = NEW.order_id;
   RETURN NULL;
 END;
@@ -391,6 +392,7 @@ CREATE TABLE public.orders (
     guest_name text NOT NULL,
     order_num integer NOT NULL,
     total_cost integer DEFAULT 0 NOT NULL,
+    total_items integer DEFAULT 0 NOT NULL,
     PRIMARY KEY (id)
 );
 ALTER TABLE public.orders OWNER TO neondb_owner;
@@ -415,7 +417,7 @@ CREATE TRIGGER before_insert_set_unit_price
     BEFORE INSERT ON public.order_line_items FOR EACH ROW EXECUTE FUNCTION public.set_unit_price();
 
 CREATE TRIGGER after_insert_update_order_price
-    AFTER INSERT ON public.order_line_items FOR EACH ROW EXECUTE FUNCTION public.update_order_cost();
+    AFTER INSERT ON public.order_line_items FOR EACH ROW EXECUTE FUNCTION public.update_order_data();
 
 --
 -- Constraints
