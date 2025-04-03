@@ -1,8 +1,13 @@
 import { Elysia, t } from 'elysia'
 import { PGService } from '../services/postgres.service'
+import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
 
 
 export const ItemsController = new Elysia({ prefix: "/items" })
+	.use(jwtCheckerPlugin)
+	.guard({
+		isAuthenticated: true
+	})
 	.derive(() => {
 		return {
 			db: PGService.getInstance()
