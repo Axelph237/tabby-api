@@ -378,7 +378,7 @@ ALTER TABLE public.menus OWNER TO neondb_owner;
 CREATE TABLE public.sessions (
     id serial NOT NULL,
     menu_id uuid NOT NULL,
-    expires timestamp with time zone,
+    expires_at timestamp with time zone,
     PRIMARY KEY (id)
 );
 ALTER TABLE public.sessions OWNER TO neondb_owner;
