@@ -1,14 +1,20 @@
 import { Elysia, t } from 'elysia'
 import { PgsqlService } from '../services/psql.service'
 import { uuidObj } from '../+types/schema'
+import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
 
 export const SessionController = new Elysia({ prefix: "/sessions" })
+	.use(jwtCheckerPlugin)
+	.guard({
+		isAuthenticated: true
+	})
 	.derive(() => {
 		return {
 			db: PgsqlService.getInstance()
 		}
 	})
-	.post("/", ({ body, db }) => {
+	// 4.1
+	.post("/", ({ body, user, db }) => {
 		return body
 	}, {
 		body: t.Object({
@@ -17,7 +23,8 @@ export const SessionController = new Elysia({ prefix: "/sessions" })
 			end_time: t.Date()
 		})
 	})
-	.delete("/:sessId", ({ params, db }) => {
+	// 4.2
+	.delete("/:sessId", ({ params, user, db }) => {
 		return params
 	}, {
 		params: t.Object({

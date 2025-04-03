@@ -22,7 +22,8 @@ export const ItemsController = new Elysia({ prefix: "/items" })
 		response: t.Array(itemDetailsObj)
 	})
 	// 2.2 - Create new item
-	.post("/", async ({  body, user, db }) => {
+	.post("/", async ({ body, user, db }) => {
+		// @ts-ignore
 		return await db.createItem(user.id, body);
 	}, {
 		body: t.Omit(itemObj, ignoredKeys),
@@ -55,6 +56,7 @@ export const ItemsController = new Elysia({ prefix: "/items" })
 			// OPTIONS
 			// 2.5 - Create option
 			.post("/options", async ({ params, body, user, db}) => {
+				// @ts-ignore
 				return await db.createOption(user.id, params.itemId, body);
 			},{
 				body: t.Omit(itemOptionObj, ignoredKeys),
