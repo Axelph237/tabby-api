@@ -24,8 +24,8 @@ import { dbConnectionUri } from '../database'
 
 // Service garbage collection if module closes
 const registry = new FinalizationRegistry((db: SQL) => db.close())
-export class PGService {
-	private static instance: PGService
+export class PgsqlService {
+	private static instance: PgsqlService
 	private readonly db: SQL
 
 	private constructor() {
@@ -38,11 +38,11 @@ export class PGService {
 		registry.register(this, this.db)
 	}
 
-	static getInstance(): PGService {
-		if (!PGService.instance) {
-			PGService.instance = new PGService()
+	static getInstance(): PgsqlService {
+		if (!PgsqlService.instance) {
+			PgsqlService.instance = new PgsqlService()
 		}
-		return PGService.instance
+		return PgsqlService.instance
 	}
 
 	// ---- QUERY FUNCTIONS
@@ -328,122 +328,124 @@ export class PGService {
 		}
 	}
 
-	getCartDetails = async (
-		userId: UUID,
-		menuId: UUID
-	): Promise<CartDetails> => {
-		try {
-			const [cart] = await this
-				.db`SELECT * FROM get_cart_details(${userId}, ${menuId});`
-
-			Value.Assert(cartDetailsObject, cart)
-			return cart
-		} catch (e) {
-			throw new ServiceError('Failed to get cart details.', e)
-		}
-	}
-
-	createCart = async (userId: UUID, menuId: UUID): Promise<CartDetails> => {
-		try {
-			const [cart] = await this.db`
-				INSERT INTO carts (created_by, menu_id)
-				VALUES (${userId}, ${menuId})
-				ON CONFLICT DO NOTHING
-				RETURNING id, created_at, created_by, menu_id, 0 as total_cost, '[]'::json as cart_items
-			`
-
-			Value.Assert(cartDetailsObject, cart)
-			return cart
-		} catch (e) {
-			throw new ServiceError('Failed to create new cart.', e)
-		}
-	}
-
-	getItemsInCart = async (cartId: number): Promise<CartItemDetails[]> => {
-		try {
-			const result = await this
-				.db`SELECT * FROM get_cart_items(${cartId});`
-
-			Value.Assert(t.Array(cartItemDetailsObject), result)
-			return result
-		} catch (e) {
-			throw new ServiceError('Failed to get items in cart.', e)
-		}
-	}
-
-	addItemToCart = async (
-		cartId: number,
-		itemId: number,
-		count: number,
-		selections?: number[]
-	): Promise<CartItemDetails> => {
-		try {
-			const basePriceQ = this.db`
-						SELECT base_price
-					    FROM items
-					    WHERE id = ${itemId}`
-
-			// Use more advanced query if there are selections on the cart item
-			const unitPriceQ =
-				selections && selections.length > 0
-					? this.db`
-						SELECT COALESCE(SUM(price), 0) + ${basePriceQ},
-						FROM item_option_selections AS ios
-						WHERE ios.id IN ${sql(selections)}`
-					: basePriceQ
-
-			await this.db.begin(async (tx) => {
-				// Insert the new item
-				const [newId] = await tx`
-					INSERT INTO cart_items (cart_id, item_id, count, unit_price)
-					VALUES (${cartId}, ${itemId}, ${count}, (${unitPriceQ}));`
-
-				// Insert selections if they exist
-				if (selections && selections.length > 0) {
-					// Format selections for insertion into table
-					const selObjs = []
-					for (const sel of selections)
-						selObjs.push({
-							cart_item_id: newId,
-							option_selection: sel,
-						})
-
-					await tx`INSERT INTO cart_item_selections ${sql(selObjs)}`
-				}
-			})
-
-			const [cartItem] = await this
-				.db`SELECT * FROM get_cart_items(${cartId});`
-			Value.Assert(cartItemDetailsObject, cartItem)
-			return cartItem
-		} catch (e) {
-			throw new ServiceError('Failed to add item to cart.', e)
-		}
-	}
-
-	updateItemInCartCount = async (cartItemId: number, count: number): Promise<{ id: number, new_count: number, was_deleted: boolean }> => {
-		try {
-			const [deletedDetails] = await this.db`
-				WITH updated AS (
-					UPDATE cart_items
-					SET count = count + ${count}
-					WHERE id = ${cartItemId}
-					RETURNING id, count
-				), deleted AS (
-					DELETE FROM cart_items AS ci
-					WHERE id = ${cartItemId}
-						AND count + ${count} <= 0
-					RETURNING *
-				)
-				SELECT
-					COALESCE(u.id, d.id) AS id,
-					COALESCE(u.count, 0) AS new_count,
-					(d.id IS NOT NULL) AS was_deleted
-				FROM updated AS u
-				FULL OUTER JOIN deleted AS d ON u.id = d.id;`
-			return deletedDetails;
-		} catch (e) {
-			throw new ServiceError('Failed to delete item from cart.', e)
-		}
-	}
+	// getCartDetails = async (
+	// 	userId: UUID,
+	// 	menuId: UUID
+	// ): Promise<CartDetails> => {
+	// 	try {
+	// 		const [cart] = await this
+	// 			.db`SELECT * FROM get_cart_details(${userId}, ${menuId});`
+	//
+	// 		Value.Assert(cartDetailsObject, cart)
+	// 		return cart
+	// 	} catch (e) {
+	// 		throw new ServiceError('Failed to get cart details.', e)
+	// 	}
+	// }
+	//
+	// createCart = async (userId: UUID, menuId: UUID): Promise<CartDetails> => {
+	// 	try {
+	// 		const [cart] = await this.db`
+	// 			INSERT INTO carts (created_by, menu_id)
+	// 			VALUES (${userId}, ${menuId})
+	// 			ON CONFLICT DO NOTHING
+	// 			RETURNING id, created_at, created_by, menu_id, 0 as total_cost, '[]'::json as cart_items
+	// 		`
+	//
+	// 		Value.Assert(cartDetailsObject, cart)
+	// 		return cart
+	// 	} catch (e) {
+	// 		throw new ServiceError('Failed to create new cart.', e)
+	// 	}
+	// }
+	//
+	// // TODO fix to use correct function
+	// getItemsInCart = async (cartId: number): Promise<CartItemDetails[]> => {
+	// 	try {
+	// 		const result = await this
+	// 			.db`SELECT * FROM get_cart_items(${cartId});`
+	//
+	// 		Value.Assert(t.Array(cartItemDetailsObject), result)
+	// 		return result
+	// 	} catch (e) {
+	// 		throw new ServiceError('Failed to get items in cart.', e)
+	// 	}
+	// }
+	//
+	// addItemToCart = async (
+	// 	cartId: number,
+	// 	itemId: number,
+	// 	count: number,
+	// 	selections?: number[]
+	// ): Promise<CartItemDetails> => {
+	// 	try {
+	// 		const basePriceQ = this.db`
+	// 					SELECT base_price
+	// 				    FROM items
+	// 				    WHERE id = ${itemId}`
+	//
+	// 		// Use more advanced query if there are selections on the cart item
+	// 		const unitPriceQ =
+	// 			selections && selections.length > 0
+	// 				? this.db`
+	// 					SELECT COALESCE(SUM(price), 0) + ${basePriceQ}
+	// 					FROM item_option_selections AS ios
+	// 					WHERE ios.id IN ${sql(selections)}`
+	// 				: basePriceQ
+	//
+	// 		await this.db.begin(async (tx) => {
+	// 			// Insert the new item
+	// 			const [newId] = await tx`
+	// 				INSERT INTO cart_items (cart_id, item_id, count, unit_price)
+	// 				VALUES (${cartId}, ${itemId}, ${count}, (${unitPriceQ}));`
+	//
+	// 			// Insert selections if they exist
+	// 			if (selections && selections.length > 0) {
+	// 				// Format selections for insertion into table
+	// 				const selObjs = []
+	// 				for (const sel of selections)
+	// 					selObjs.push({
+	// 						cart_item_id: newId,
+	// 						option_selection: sel,
+	// 					})
+	//
+	// 				await tx`INSERT INTO cart_item_selections ${sql(selObjs)}`
+	// 			}
+	// 		})
+	//
+	// 		// TODO use correct function
+	// 		const [cartItem] = await this
+	// 			.db`SELECT * FROM get_cart_items(${cartId});`
+	// 		Value.Assert(cartItemDetailsObject, cartItem)
+	// 		return cartItem
+	// 	} catch (e) {
+	// 		throw new ServiceError('Failed to add item to cart.', e)
+	// 	}
+	// }
+	//
+	// updateItemInCartCount = async (cartItemId: number, count: number): Promise<{ id: number, new_count: number, was_deleted: boolean }> => {
+	// 	try {
+	// 		const [deletedDetails] = await this.db`
+	// 			WITH updated AS (
+	// 				UPDATE cart_items
+	// 				SET count = count + ${count}
+	// 				WHERE id = ${cartItemId}
+	// 				RETURNING id, count
+	// 			), deleted AS (
+	// 				DELETE FROM cart_items AS ci
+	// 				WHERE id = ${cartItemId}
+	// 					AND count + ${count} <= 0
+	// 				RETURNING *
+	// 			)
+	// 			SELECT
+	// 				COALESCE(u.id, d.id) AS id,
+	// 				COALESCE(u.count, 0) AS new_count,
+	// 				(d.id IS NOT NULL) AS was_deleted
+	// 			FROM updated AS u
+	// 			FULL OUTER JOIN deleted AS d ON u.id = d.id;`
+	// 		return deletedDetails;
+	// 	} catch (e) {
+	// 		throw new ServiceError('Failed to delete item from cart.', e)
+	// 	}
+	// }
 }

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { PGService } from '../services/postgres.service'
+import { PgsqlService } from '../services/postgres.service'
 import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
 
 
@@ -10,7 +10,7 @@ export const ItemsController = new Elysia({ prefix: "/items" })
 	})
 	.derive(() => {
 		return {
-			db: PGService.getInstance()
+			db: PgsqlService.getInstance()
 		}
 	})
 	// 2.1 - Get user's items

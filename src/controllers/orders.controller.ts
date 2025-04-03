@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia'
 import { uuidObject } from '../+types/schema'
-import { PGService } from '../services/postgres.service'
+import { PgsqlService } from '../services/postgres.service'
 
 export const OrdersController = new Elysia({ prefix: "/orders" })
 	.derive(() => {
 		return {
-			db: PGService.getInstance()
+			db: PgsqlService.getInstance()
 		}
 	})
 	.group("/:sessId", {

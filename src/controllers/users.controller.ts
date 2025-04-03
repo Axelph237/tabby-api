@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { PGService } from '../services/postgres.service'
+import { PgsqlService } from '../services/postgres.service'
 import {
     itemObject,
     itemOptionObject,
@@ -15,7 +15,7 @@ import {Value} from "@sinclair/typebox/value";
 export const UsersController = new Elysia({ prefix: "/users/:userId" })
     .derive(() => {
         return {
-            db: PGService.getInstance()
+            db: PgsqlService.getInstance()
         }
     })
     .guard({

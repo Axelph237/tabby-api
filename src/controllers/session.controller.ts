@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia'
-import { PGService } from '../services/postgres.service'
+import { PgsqlService } from '../services/postgres.service'
 import { uuidObject } from '../+types/schema'
 
 export const SessionController = new Elysia({ prefix: "/sessions" })
 	.derive(() => {
 		return {
-			db: PGService.getInstance()
+			db: PgsqlService.getInstance()
 		}
 	})
 	.post("/", ({ body, db }) => {

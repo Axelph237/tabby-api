@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import {PGService} from "../services/postgres.service";
+import {PgsqlService} from "../services/postgres.service";
 import { uuidObject } from '../+types/schema'
 import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
 
@@ -10,7 +10,7 @@ export const MenusController = new Elysia({ prefix: '/menus' })
 	})
 	.derive(() => {
 		return {
-			db: PGService.getInstance()
+			db: PgsqlService.getInstance()
 		}
 	})
 	// 1.1 - Get user's menus

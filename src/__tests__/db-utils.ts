@@ -1,5 +1,5 @@
 import * as child_process from 'node:child_process'
-import { PGService } from '../services/postgres.service'
+import { PgsqlService } from '../services/postgres.service'
 import { randomUUIDv7, sql, SQL } from 'bun'
 
 const pgUser = process.env.PG_USER ?? 'postgres'
@@ -8,7 +8,7 @@ const pgHost = process.env.PG_HOST ?? 'localhost:5532'
 const pgDatabase = process.env.PG_DATABASE ?? 'postgres'
 const connectionUri = `postgresql://${pgUser}:${pgPassword}@${pgHost}/${pgDatabase}`
 
-export let testPgService: PGService
+export let testPgService: PgsqlService
 export namespace dbState {
 	export function snapshot() {
 		child_process.execSync(
@@ -71,7 +71,7 @@ export async function setupTestDatabase() {
 	dbState.snapshot()
 
 	// Run PGService
-	testPgService = PGService.getInstance()
+	testPgService = PgsqlService.getInstance()
 }
 
 export function cleanupTestDatabase() {
