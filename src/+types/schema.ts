@@ -69,6 +69,33 @@ export const menuItemObj = t.Object({
 })
 export type MenuItem = Static<typeof menuItemObj>
 
+export const orderObj = t.Object({
+	id: t.Integer(),
+	session_id: uuidObj,
+	guest_name: t.String(),
+	order_num: t.Integer(),
+	total_cost: t.Integer(),
+	total_items: t.Integer()
+});
+export type Order = Static<typeof orderObj>;
+
+export const orderLineItem = t.Object({
+	id: t.Integer(),
+	item_id: t.Integer(),
+	order_id: t.Integer(),
+	count: t.Integer(),
+	unit_price: t.Integer(),
+	selections: t.Array(t.Integer())
+});
+export type OrderLineItem = Static<typeof orderLineItem>;
+
+export const session = t.Object({
+	id: uuidObj,
+	menu_id: uuidObj,
+	expires_at: t.Date()
+});
+export type Session = Static<typeof session>;
+
 export const cartItemObj = t.Object({
 	id: t.Integer(),
 	cart_id: t.Integer(),

@@ -377,7 +377,7 @@ ALTER TABLE public.menus OWNER TO neondb_owner;
 
 -- Name: sessions; Type: TABLE; Schema: public; Owner: neondb_owner
 CREATE TABLE public.sessions (
-    id serial NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     menu_id uuid NOT NULL,
     expires_at timestamp with time zone,
     PRIMARY KEY (id)
@@ -388,7 +388,7 @@ ALTER TABLE public.sessions OWNER TO neondb_owner;
 -- Name: orders
 CREATE TABLE public.orders (
     id serial NOT NULL,
-    session_id integer NOT NULL,
+    session_id uuid NOT NULL,
     guest_name text NOT NULL,
     order_num integer NOT NULL,
     total_cost integer DEFAULT 0 NOT NULL,
