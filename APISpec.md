@@ -285,7 +285,7 @@ _Requires registered account. Fails if parent option type is "text"._
 
 ```json
 {
-  "parent_option": number | undefined,
+  "parent_option": number | null,
   "label": string,
   "price": number,
   "is_default": boolean

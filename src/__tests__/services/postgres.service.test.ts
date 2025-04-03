@@ -217,7 +217,7 @@ describe('items', () => {
 			is_default: true,
 		}
 
-		const result = await testPgService.createOptionSelection(
+		const result = await testPgService.createSelection(
 			userId,
 			optionId,
 			newSelection
@@ -233,7 +233,7 @@ describe('items', () => {
 		const optionId = 2
 		const selectionLabel = 'New selection'
 
-		const result = await testPgService.deleteOptionSelection(
+		const result = await testPgService.deleteSelections(
 			userId,
 			optionId,
 			selectionLabel
@@ -251,7 +251,7 @@ describe('items', () => {
 			is_default: true,
 		}
 
-		const createRes = await testPgService.createOptionSelection(
+		const createRes = await testPgService.createSelection(
 			userId,
 			optionId,
 			newSelection
@@ -262,7 +262,7 @@ describe('items', () => {
 			label: 'UPDATED label',
 			price: 500,
 		}
-		const result = await testPgService.updateOptionSelection(
+		const result = await testPgService.updateSelection(
 			userId,
 			optionId,
 			newSelection.label,

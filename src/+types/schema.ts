@@ -1,5 +1,8 @@
 import { Static, t } from 'elysia'
 
+// Commonly ignored keys for various functions
+export const ignoredKeys = ["id", "created_at", "created_by"]
+
 export const uuidObj = t.String({ format: 'uuid' })
 export type UUID = Static<typeof uuidObj>
 

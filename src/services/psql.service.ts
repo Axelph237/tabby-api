@@ -10,14 +10,14 @@ import {
 	ItemOption,
 	ItemDetails,
 	ItemSelection,
-	itemObject,
+	itemObj,
 	itemDetailsObj,
 	itemOptionObj,
 	itemSelectObj,
 	CartDetails,
 	CartItemDetails,
 	cartDetailsObj,
-	cartItemDetailsObject
+	cartItemDetailsObj
 } from '../+types/schema'
 import { ServiceError } from '../+types/errors'
 import { dbConnectionUri } from '../database'
@@ -227,13 +227,13 @@ export class PgsqlService {
 	updateItem = async (
 		userId: UUID,
 		itemId: number,
-		updateVals: Omit<Item, "id" | "created_by" | "created_at" >
+		updateVals: Partial<Omit<Item, "id" | "created_by" | "created_at">>
 	): Promise<Item> => {
 		try {
 			const [item] = await this
 				.db`UPDATE items SET ${sql(updateVals)} WHERE created_by = ${userId} AND id = ${itemId} RETURNING *;`
 
-			Value.Assert(itemObject, item)
+			Value.Assert(itemObj, item)
 			return item
 		} catch (e) {
 			throw new ServiceError('Failed to update item.', e)
@@ -298,9 +298,9 @@ export class PgsqlService {
 		}
 	}
 
-	createOptionSelection = async (
+	createSelection = async (
 		userId: UUID,
-		optionId: number,
+		optionId: number | null,
 		selection: Omit<ItemSelection, 'id' | 'created_by' | 'option_id'>
 	): Promise<ItemSelection> => {
 		try {
@@ -320,17 +320,15 @@ export class PgsqlService {
 		}
 	}
 
-	deleteOptionSelection = async (
+	deleteSelections = async (
 		userId: UUID,
-		optionId: number,
-		selectionLabel: string
+		selectionIds: number[]
 	): Promise<true> => {
 		try {
 			const result = await this.db`
 				DELETE FROM item_option_selections
 				WHERE created_by = ${userId}
-					AND option_id = ${optionId}
-					AND label = ${selectionLabel};
+					AND id = ANY ${selectionIds};
 			`
 
 			return true
@@ -339,18 +337,16 @@ export class PgsqlService {
 		}
 	}
 
-	updateOptionSelection = async (
+	updateSelection = async (
 		userId: UUID,
-		optionId: number,
-		selectionLabel: string,
-		updates: Partial<ItemSelection>
+		selectionId: number,
+		updates: Partial<Omit<ItemSelection, "id" | "created_by" | "created_at">>
 	): Promise<ItemSelection> => {
 		try {
 			const [updated] = await this.db`
 				UPDATE item_option_selections SET ${sql(updates)}
-				WHERE option_id = ${optionId}
-				  	AND created_by = ${userId}
-					AND label = ${selectionLabel}
+				WHERE created_by = ${userId}
+					AND id = ${selectionId}
 				RETURNING *;`
 
 			return updated
