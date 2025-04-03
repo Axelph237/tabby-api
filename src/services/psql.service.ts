@@ -3,20 +3,20 @@ import { sql, SQL } from 'bun'
 import { Value } from '@sinclair/typebox/value'
 import {
 	UUID,
-	uuidObject,
+	uuidObj,
 	Menu,
-	menuObject,
+	menuObj,
 	Item,
 	ItemOption,
 	ItemDetails,
-	ItemOptionSelection,
+	ItemSelection,
 	itemObject,
-	itemDetailsObject,
-	itemOptionObject,
-	itemOptionSelectObject,
+	itemDetailsObj,
+	itemOptionObj,
+	itemSelectObj,
 	CartDetails,
 	CartItemDetails,
-	cartDetailsObject,
+	cartDetailsObj,
 	cartItemDetailsObject
 } from '../+types/schema'
 import { ServiceError } from '../+types/errors'
@@ -48,7 +48,7 @@ export class PgsqlService {
 	// ---- QUERY FUNCTIONS
 	// 1.1
 	private basicMenu = t.Object({
-		id: uuidObject,
+		id: uuidObj,
 		name: t.String(),
 	})
 	getMenu = async (
@@ -78,7 +78,7 @@ export class PgsqlService {
 			const result = await this
 				.db`SELECT * FROM get_items_from_menu(${menuId})`
 
-			Value.Assert(t.Array(itemDetailsObject), result)
+			Value.Assert(t.Array(itemDetailsObj), result)
 
 			return result
 		} catch (e) {
@@ -87,7 +87,7 @@ export class PgsqlService {
 	}
 
 	// 1.3
-	private menuList = t.Array(menuObject)
+	private menuList = t.Array(menuObj)
 	getUserMenus = async (
 		userId: UUID
 	): Promise<Static<typeof this.menuList>> => {
@@ -113,7 +113,7 @@ export class PgsqlService {
 				VALUES (${name}, ${userId})
 				RETURNING *`
 
-			Value.Assert(menuObject, menu)
+			Value.Assert(menuObj, menu)
 			return menu
 		} catch (e) {
 			throw new ServiceError('Failed to create new menu.', e)
@@ -183,7 +183,7 @@ export class PgsqlService {
 			// Function abstracted for better management
 			const result = await this
 				.db`SELECT * FROM get_user_items(${userId})`
-			Value.Assert(t.Array(itemDetailsObject), result)
+			Value.Assert(t.Array(itemDetailsObj), result)
 
 			return result
 		} catch (e) {
@@ -211,10 +211,13 @@ export class PgsqlService {
 		}
 	}
 
-	deleteItem = async (userId: UUID, itemId: number): Promise<true> => {
+	deleteItems = async (
+		userId: UUID,
+		itemIds: number[]
+	): Promise<true> => {
 		try {
 			await this
-				.db`DELETE FROM items WHERE created_by = ${userId} AND id = ${itemId};`
+				.db`DELETE FROM items WHERE created_by = ${userId} AND id = ANY ${itemIds};`
 			return true
 		} catch (e) {
 			throw new ServiceError('Failed to delete item.', e)
@@ -224,7 +227,7 @@ export class PgsqlService {
 	updateItem = async (
 		userId: UUID,
 		itemId: number,
-		updateVals: object
+		updateVals: Omit<Item, "id" | "created_by" | "created_at" >
 	): Promise<Item> => {
 		try {
 			const [item] = await this
@@ -251,23 +254,23 @@ export class PgsqlService {
 			const [option] = await this
 				.db`INSERT INTO item_options ${sql(fullOpt)} RETURNING *;`
 
-			Value.Assert(itemOptionObject, option)
+			Value.Assert(itemOptionObj, option)
 			return option
 		} catch (e) {
 			throw new ServiceError('Failed to create new option on item.', e)
 		}
 	}
 
-	deleteOption = async (
+	deleteOptions = async (
 		userId: UUID,
 		itemId: number,
-		optionId: number
+		optionIds: number[]
 	): Promise<true> => {
 		try {
 			await this.db`DELETE FROM item_options 
        			WHERE created_by = ${userId}
        			  AND item_id = ${itemId}
-       			  AND id = ${optionId} RETURNING label, item_id;`
+       			  AND id = ANY ${optionIds} RETURNING label, item_id;`
 
 			return true
 		} catch (e) {
@@ -298,8 +301,8 @@ export class PgsqlService {
 	createOptionSelection = async (
 		userId: UUID,
 		optionId: number,
-		selection: Omit<ItemOptionSelection, 'id' | 'created_by' | 'option_id'>
-	): Promise<ItemOptionSelection> => {
+		selection: Omit<ItemSelection, 'id' | 'created_by' | 'option_id'>
+	): Promise<ItemSelection> => {
 		try {
 			const fullSel = {
 				...selection,
@@ -310,7 +313,7 @@ export class PgsqlService {
 			const [sel] = await this
 				.db`INSERT INTO item_option_selections ${sql(fullSel)} RETURNING *;`
 
-			Value.Assert(itemOptionSelectObject, sel)
+			Value.Assert(itemSelectObj, sel)
 			return sel
 		} catch (e) {
 			throw new ServiceError('Failed to create new option selection.', e)
@@ -340,8 +343,8 @@ export class PgsqlService {
 		userId: UUID,
 		optionId: number,
 		selectionLabel: string,
-		updates: Partial<ItemOptionSelection>
-	): Promise<ItemOptionSelection> => {
+		updates: Partial<ItemSelection>
+	): Promise<ItemSelection> => {
 		try {
 			const [updated] = await this.db`
 				UPDATE item_option_selections SET ${sql(updates)}

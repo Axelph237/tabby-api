@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { uuidObject } from '../+types/schema'
+import { uuidObj } from '../+types/schema'
 import { PgsqlService } from '../services/psql.service'
 
 export const OrdersController = new Elysia({ prefix: "/orders" })
@@ -10,7 +10,7 @@ export const OrdersController = new Elysia({ prefix: "/orders" })
 	})
 	.group("/:sessId", {
 		params: t.Object({
-			sessId: uuidObject,
+			sessId: uuidObj,
 		})
 	}, app =>
 		app

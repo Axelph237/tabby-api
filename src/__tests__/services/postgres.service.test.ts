@@ -129,7 +129,7 @@ describe('items', () => {
 		const userId = testUsers[0].id
 		const itemId = 10
 
-		const result = await testPgService.deleteItem(userId, itemId)
+		const result = await testPgService.deleteItems(userId, itemId)
 		expect(result).toBe(true)
 	})
 
@@ -172,7 +172,7 @@ describe('items', () => {
 		const itemId = 5
 		const optionId = 1
 
-		const result = await testPgService.deleteOption(
+		const result = await testPgService.deleteOptions(
 			userId,
 			itemId,
 			1

@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { PgsqlService } from '../services/psql.service'
-import { uuidObject } from '../+types/schema'
+import { uuidObj } from '../+types/schema'
 
 export const SessionController = new Elysia({ prefix: "/sessions" })
 	.derive(() => {
@@ -12,8 +12,8 @@ export const SessionController = new Elysia({ prefix: "/sessions" })
 		return body
 	}, {
 		body: t.Object({
-			menu_id: uuidObject,
-			session_admins: t.Array(uuidObject),
+			menu_id: uuidObj,
+			session_admins: t.Array(uuidObj),
 			end_time: t.Date()
 		})
 	})
@@ -21,6 +21,6 @@ export const SessionController = new Elysia({ prefix: "/sessions" })
 		return params
 	}, {
 		params: t.Object({
-			sessId: uuidObject
+			sessId: uuidObj
 		})
 	})

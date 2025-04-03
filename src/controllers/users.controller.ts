@@ -2,10 +2,10 @@ import { Elysia, t } from 'elysia'
 import { PgsqlService } from '../services/psql.service'
 import {
     itemObject,
-    itemOptionObject,
-    itemOptionSelectObject,
-    menuObject,
-    uuidObject
+    itemOptionObj,
+    itemSelectObj,
+    menuObj,
+    uuidObj
 } from "../+types/schema";
 import {Value} from "@sinclair/typebox/value";
 
@@ -20,7 +20,7 @@ export const UsersController = new Elysia({ prefix: "/users/:userId" })
     })
     .guard({
         params: t.Object({
-            userId: uuidObject
+            userId: uuidObj
         })
     })
     // 1.3
@@ -46,7 +46,7 @@ export const UsersController = new Elysia({ prefix: "/users/:userId" })
         await db.addItemToMenu(params.menuId, itemId);
     }, {
         params: t.Object({
-           menuId: uuidObject
+           menuId: uuidObj
         }),
         body: t.Union([ t.Object({
             id: t.Integer()
@@ -62,7 +62,7 @@ export const UsersController = new Elysia({ prefix: "/users/:userId" })
         await db.deleteItem(params.menuId, params.menuItemId);
     }, {
         params: t.Object({
-            menuId: uuidObject,
+            menuId: uuidObj,
             menuItemId: t.Number()
         })
     })
@@ -131,7 +131,7 @@ export const UsersController = new Elysia({ prefix: "/users/:userId" })
             itemId: t.Integer(),
             optionId: t.Integer()
         }),
-        body: t.Partial(itemOptionObject)
+        body: t.Partial(itemOptionObj)
     })
     // 2.8
     .post("/items/:itemId/options/:optionId/selections", async ({ params, body, db }) => {
@@ -140,7 +140,7 @@ export const UsersController = new Elysia({ prefix: "/users/:userId" })
         params: t.Object({
             optionId: t.Integer()
         }),
-        body: t.Omit(itemOptionSelectObject, ["created_by", "option_id", "id"])
+        body: t.Omit(itemSelectObj, ["created_by", "option_id", "id"])
     })
     // 2.9
     .delete("/items/:itemId/options/:optionId/selections/:selectionLabel", async ({ params, db}) => {
@@ -159,7 +159,7 @@ export const UsersController = new Elysia({ prefix: "/users/:userId" })
             optionId: t.Integer(),
             selectionLabel: t.String(),
         }),
-        body: t.Partial(t.Omit(itemOptionSelectObject, ["created_by", "option_id", "id"]))
+        body: t.Partial(t.Omit(itemSelectObj, ["created_by", "option_id", "id"]))
     })
 
 // DEPRECATED carts routes

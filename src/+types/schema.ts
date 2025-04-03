@@ -1,83 +1,82 @@
 import { Static, t } from 'elysia'
 
-export const uuidObject = t.String({ format: 'uuid' })
-export type UUID = Static<typeof uuidObject>
+export const uuidObj = t.String({ format: 'uuid' })
+export type UUID = Static<typeof uuidObj>
 
 // ---- TABLE OBJECTS
 // Menus
-export const menuObject = t.Object({
-	id: uuidObject,
+export const menuObj = t.Object({
+	id: uuidObj,
 	created_at: t.Date(),
-	created_by: uuidObject,
+	created_by: uuidObj,
 	name: t.String(),
 })
-export type Menu = Static<typeof menuObject>
+export type Menu = Static<typeof menuObj>
 
 // Carts
-export const cartObject = t.Object({
+export const cartObj = t.Object({
 	id: t.Integer(),
 	created_at: t.Date(),
-	created_by: uuidObject,
-	menu_id: uuidObject,
+	created_by: uuidObj,
+	menu_id: uuidObj,
 })
-export type Cart = Static<typeof cartObject>
+export type Cart = Static<typeof cartObj>
 
 // Items
-export const itemObject = t.Object({
+export const itemObj = t.Object({
 	id: t.Integer(),
 	created_at: t.Date(),
-	created_by: uuidObject,
+	created_by: uuidObj,
 	name: t.String(),
 	description: t.Nullable(t.String()),
 	img_url: t.Nullable(t.String({ format: 'uri' })),
 	base_price: t.Integer(),
 })
-export type Item = Static<typeof itemObject>
+export type Item = Static<typeof itemObj>
 
 export enum ItemOptionTypes {
 	One = 'one',
 	Many = 'many',
 	Text = 'text',
 }
-
-export const itemOptionObject = t.Object({
+export const itemOptionObj = t.Object({
 	id: t.Integer(),
-	created_by: uuidObject,
+	created_by: uuidObj,
 	label: t.String(),
 	type: t.Union([t.Literal('one'), t.Literal('many'), t.Literal('text')]),
 	item_id: t.Integer(),
 })
-export type ItemOption = Static<typeof itemOptionObject>
+export type ItemOption = Static<typeof itemOptionObj>
 
-export const itemOptionSelectObject = t.Object({
+export const itemSelectObj = t.Object({
 	id: t.Integer(),
-	created_by: uuidObject,
+	created_by: uuidObj,
 	label: t.String(),
 	price: t.Integer(),
 	is_default: t.Boolean(),
 	option_id: t.Integer(),
 })
-export type ItemOptionSelection = Static<typeof itemOptionSelectObject>
+export type ItemSelection = Static<typeof itemSelectObj>
 
-export const menuItemObject = t.Object({
-	id: uuidObject,
+export const menuItemObj = t.Object({
+	id: uuidObj,
 	item_id: t.Integer(),
-	created_by: uuidObject,
-	menu_id: uuidObject,
+	created_by: uuidObj,
+	menu_id: uuidObj,
 })
-export type MenuItem = Static<typeof menuItemObject>
+export type MenuItem = Static<typeof menuItemObj>
 
-export const cartItemObject = t.Object({
+export const cartItemObj = t.Object({
 	id: t.Integer(),
 	cart_id: t.Integer(),
 	item_id: t.Integer(),
 	count: t.Integer(),
 	unit_price: t.Integer(),
 })
-export type CartItem = Static<typeof cartItemObject>
+export type CartItem = Static<typeof cartItemObj>
 
 // ---- FUNCTION OBJECTS
-export const itemDetailsObject = t.Object({
+export const itemDetailsObj = t.Object({
     id: t.Integer(),
     name: t.String(),
     description: t.Nullable(t.String()),
@@ -99,13 +98,13 @@ export const itemDetailsObject = t.Object({
         )
     ),
 });
-export type ItemDetails = Static<typeof itemDetailsObject>;
+export type ItemDetails = Static<typeof itemDetailsObj>;
 
-export const cartDetailsObject = t.Object({
+export const cartDetailsObj = t.Object({
 	id: t.Integer(),
 	created_at: t.Date(),
-	created_by: uuidObject,
-	menu_id: uuidObject,
+	created_by: uuidObj,
+	menu_id: uuidObj,
 	total_cost: t.Integer(),
 	cart_items: t.Array(
 		t.Object({
@@ -114,9 +113,9 @@ export const cartDetailsObject = t.Object({
 		})
 	),
 })
-export type CartDetails = Static<typeof cartDetailsObject>
+export type CartDetails = Static<typeof cartDetailsObj>
 
-export const cartItemDetailsObject = t.Object({
+export const cartItemDetailsObj = t.Object({
 	cart_item_id: t.Integer(),
 	item_id: t.Integer(),
 	name: t.String(),
@@ -141,4 +140,4 @@ export const cartItemDetailsObject = t.Object({
 		})
 	),
 })
-export type CartItemDetails = Static<typeof cartItemDetailsObject>
+export type CartItemDetails = Static<typeof cartItemDetailsObj>

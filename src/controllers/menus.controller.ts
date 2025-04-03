@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import {PgsqlService} from "../services/psql.service";
-import { uuidObject } from '../+types/schema'
+import { uuidObj } from '../+types/schema'
 import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
 
 export const MenusController = new Elysia({ prefix: '/menus' })
@@ -28,7 +28,7 @@ export const MenusController = new Elysia({ prefix: '/menus' })
 	// Menu specific route
 	.group("/:menuId", {
 		params: t.Object({
-			menuId: uuidObject
+			menuId: uuidObj
 		})
 	}, app => app
 			// 1.3 - Get menu details
