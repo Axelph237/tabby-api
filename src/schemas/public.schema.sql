@@ -135,7 +135,7 @@ END;
 $$;
 
 
--- Name: get_items_to_menus(uuid); Type: FUNCTION; Schema: public; Owner: neondb_owner
+-- Name: get_items_from_menu(uuid); Type: FUNCTION; Schema: public; Owner: neondb_owner
 CREATE OR REPLACE FUNCTION public.get_items_from_menu(p_menu_id uuid)
     RETURNS TABLE(
         id integer,

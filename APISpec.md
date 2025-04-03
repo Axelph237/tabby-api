@@ -68,22 +68,9 @@ _Requires registered account._
 
 #### Request
 
-Option 1: Create new menu item
-
 ```json
 {
-  "name": string,
-  "description": string | null,
-  "img_url": url | null,
-  "base_price": number
-}
-```
-
-Option 2: Add existing item by ID
-
-```json
-{
-  "id": integer
+  "item_id": integer
 }
 ```
 

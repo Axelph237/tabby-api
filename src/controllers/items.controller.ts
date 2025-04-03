@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { PgsqlService } from '../services/postgres.service'
+import { PgsqlService } from '../services/psql.service'
 import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
 
 

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { PgsqlService } from '../services/postgres.service'
+import { PgsqlService } from '../services/psql.service'
 import { uuidObject } from '../+types/schema'
 
 export const SessionController = new Elysia({ prefix: "/sessions" })

@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { uuidObject } from '../+types/schema'
-import { PgsqlService } from '../services/postgres.service'
+import { PgsqlService } from '../services/psql.service'
 
 export const OrdersController = new Elysia({ prefix: "/orders" })
 	.derive(() => {

@@ -51,12 +51,15 @@ export class PgsqlService {
 		id: uuidObject,
 		name: t.String(),
 	})
-	getMenu = async (menuId: UUID): Promise<Static<typeof this.basicMenu>> => {
+	getMenu = async (
+		menuId: UUID,
+		ownerId: UUID
+	): Promise<Static<typeof this.basicMenu>> => {
 		try {
 			const [menu] = await this.db`
 				SELECT id, name
 				FROM menus
-				WHERE id = ${menuId}
+				WHERE id = ${menuId} AND created_by = ${ownerId}
 			`
 			Value.Assert(this.basicMenu, menu)
 
@@ -117,13 +120,27 @@ export class PgsqlService {
 		}
 	}
 
-	// TODO 1.5
+	// 1.4
 	addItemToMenu = async (
 		menuId: UUID,
-		item: number
-	): Promise<boolean> => {
+		itemId: number,
+		ownerId: UUID
+	): Promise<true> => {
 		try {
-			return false
+			await this.db`
+				WITH valid_item AS (
+					SELECT id FROM items
+					WHERE id = ${itemId} AND created_by = ${ownerId}
+				), valid_menu AS (
+				    SELECT id FROM menus
+				 	WHERE id = ${menuId} AND created_by = ${ownerId}
+				)
+				INSERT INTO items_to_menus (item_id, menu_id)
+				VALUES (
+				    (SELECT id FROM valid_item),
+				    (SELECT id FROM valid_menu)
+				);`;
+			return true
 		} catch (e) {
 			throw new ServiceError('Failed to add existing item to menu.', e)
 		}
@@ -133,15 +150,26 @@ export class PgsqlService {
 	 * Removes an item's relation to a menu. Does not delete the item itself.
 	 * @param menuId - The menu to delete the item from.
 	 * @param itemId - The item to delete.
+	 * @param ownerId - The owner of the item and menu
 	 * @returns true if the operation was successful, null if there was an error.
 	 */
 	deleteItemFromMenu = async (
 		menuId: UUID,
-		itemId: number
+		itemId: number,
+		ownerId: UUID
 	): Promise<true> => {
 		try {
-			this
-				.db`DELETE FROM menus_to_items WHERE item_id = ${itemId} AND menu_id = ${menuId}`
+			this.db`
+                WITH valid_item AS (
+                    SELECT id FROM items
+                    WHERE id = ${itemId} AND created_by = ${ownerId}
+                ), valid_menu AS (
+                    SELECT id FROM menus
+                    WHERE id = ${menuId} AND created_by = ${ownerId}
+                )
+				DELETE FROM items_to_menus 
+				    WHERE item_id = (SELECT id FROM valid_item)
+				    AND menu_id = (SELECT id FROM valid_menu);`;
 			return true
 		} catch (e) {
 			throw new ServiceError('Failed to delete item from menu.', e)
