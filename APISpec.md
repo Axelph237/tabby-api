@@ -360,7 +360,6 @@ _Requires registered account. Only updates defined fields._
 {
   "guest_name": string,
   "placed_at": timestamp,
-  "order_cost": number,
   "items": [
     {
       "item_id": number, // references item on menu
