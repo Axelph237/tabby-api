@@ -17,7 +17,7 @@ import {
 	CartDetails,
 	CartItemDetails,
 	cartDetailsObj,
-	cartItemDetailsObj
+	cartItemDetailsObj, Order, OrderLineItem,
 } from '../+types/schema'
 import { ServiceError } from '../+types/errors'
 import { dbConnectionUri } from '../database'
@@ -125,7 +125,7 @@ export class PgsqlService {
 		menuId: UUID,
 		itemId: number,
 		ownerId: UUID
-	): Promise<true> => {
+	): Promise<void> => {
 		try {
 			await this.db`
 				WITH valid_item AS (
@@ -140,7 +140,6 @@ export class PgsqlService {
 				    (SELECT id FROM valid_item),
 				    (SELECT id FROM valid_menu)
 				);`;
-			return true
 		} catch (e) {
 			throw new ServiceError('Failed to add existing item to menu.', e)
 		}
@@ -157,7 +156,7 @@ export class PgsqlService {
 		menuId: UUID,
 		itemId: number,
 		ownerId: UUID
-	): Promise<true> => {
+	): Promise<void> => {
 		try {
 			this.db`
                 WITH valid_item AS (
@@ -170,7 +169,6 @@ export class PgsqlService {
 				DELETE FROM items_to_menus 
 				    WHERE item_id = (SELECT id FROM valid_item)
 				    AND menu_id = (SELECT id FROM valid_menu);`;
-			return true
 		} catch (e) {
 			throw new ServiceError('Failed to delete item from menu.', e)
 		}
@@ -214,11 +212,10 @@ export class PgsqlService {
 	deleteItems = async (
 		userId: UUID,
 		itemIds: number[]
-	): Promise<true> => {
+	): Promise<void> => {
 		try {
 			await this
 				.db`DELETE FROM items WHERE created_by = ${userId} AND id = ANY ${itemIds};`
-			return true
 		} catch (e) {
 			throw new ServiceError('Failed to delete item.', e)
 		}
@@ -265,14 +262,12 @@ export class PgsqlService {
 		userId: UUID,
 		itemId: number,
 		optionIds: number[]
-	): Promise<true> => {
+	): Promise<void> => {
 		try {
 			await this.db`DELETE FROM item_options 
        			WHERE created_by = ${userId}
        			  AND item_id = ${itemId}
        			  AND id = ANY ${optionIds} RETURNING label, item_id;`
-
-			return true
 		} catch (e) {
 			throw new ServiceError('Failed to delete option on item.', e)
 		}
@@ -323,15 +318,12 @@ export class PgsqlService {
 	deleteSelections = async (
 		userId: UUID,
 		selectionIds: number[]
-	): Promise<true> => {
+	): Promise<void> => {
 		try {
 			const result = await this.db`
 				DELETE FROM item_option_selections
 				WHERE created_by = ${userId}
-					AND id = ANY ${selectionIds};
-			`
-
-			return true
+					AND id = ANY ${selectionIds};`;
 		} catch (e) {
 			throw new ServiceError('Failed to delete option selection.', e)
 		}
@@ -354,6 +346,68 @@ export class PgsqlService {
 			throw new ServiceError('Failed to update option selection.', e)
 		}
 	}
+
+	// ORDERS
+	/**
+	 * 3.1 - Gets a list of all orders for a given session.
+	 * @param sessionId - The session id to search for orders on.
+	 * @param userId - The user trying to access the orders. Must be an admin on the session.
+	 */
+	getOrders = async (
+		sessionId: UUID,
+		userId: UUID
+	): Promise<Order[]> => {
+		try {
+			return await this.db`
+				WITH valid_session AS (
+				    SELECT sessions.id
+				    FROM public.sessions
+				    JOIN menus ON menus.id = sessions.menu_id
+				    WHERE created_by = ${userId} 
+				      AND sessions.id = ${sessionId}
+				)
+				SELECT *
+				FROM public.orders
+				WHERE session_id = (SELECT id FROM valid_session);`;
+		}
+		catch (e) {
+			throw new ServiceError("Failed to get session's orders.", e);
+		}
+	}
+
+	/**
+	 * 3.2 - Creates a new order, validating cart cost before insertion.
+	 */
+	createOrder = async (
+		guest: string,
+		orderId: number,
+		placed_at: Date,
+		items: Omit<OrderLineItem, "id" | "order_id" | "unit_price">[]
+	): Promise<void> => {
+		try {
+			await this.db``;
+		}
+		catch (e) {
+			throw new ServiceError("Failed to create new order.", e);
+		}
+	}
+
+
+	/**
+	 * 3.3 - Cancels an order in the session.
+	 */
+	cancelOrder = async (
+		sessionId: UUID, 
+		orderId: number
+	): Promise<void> => {
+		try {
+			
+		}
+		catch (e) {
+			throw new ServiceError("Failed to cancel order.", e);
+		}
+	}
+
 
 	// getCartDetails = async (
 	// 	userId: UUID,
