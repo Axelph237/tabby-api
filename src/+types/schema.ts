@@ -75,7 +75,8 @@ export const orderObj = t.Object({
 	guest_name: t.String(),
 	order_num: t.Integer(),
 	total_cost: t.Integer(),
-	total_items: t.Integer()
+	total_items: t.Integer(),
+	status: t.String()
 });
 export type Order = Static<typeof orderObj>;
 

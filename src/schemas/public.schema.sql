@@ -393,6 +393,7 @@ CREATE TABLE public.orders (
     order_num integer NOT NULL,
     total_cost integer DEFAULT 0 NOT NULL,
     total_items integer DEFAULT 0 NOT NULL,
+    status text NOT NULL,
     PRIMARY KEY (id)
 );
 ALTER TABLE public.orders OWNER TO neondb_owner;
