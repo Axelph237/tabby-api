@@ -13,9 +13,8 @@ export const auth = new Elysia({
 	name: "auth"
 })
 	.use(jwt(jwtConfig))
-	.resolve({ as: "scoped" }, async ({ jwt, cookie: { auth } }) => {
+	.derive({ as: "scoped" }, async ({ jwt, cookie: { auth } }) => {
 		const payload = await jwt.verify(auth.value);
-
 		return {
 			payload,
 			user: payload ? {

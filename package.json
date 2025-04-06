@@ -12,6 +12,7 @@
 		"bun": "^1.2.7",
 		"elysia": "latest",
 		"elysia-oauth2": "^2.0.0",
+		"logixlysia": "^4.1.2",
 		"prettier": "^3.5.3"
 	},
 	"devDependencies": {

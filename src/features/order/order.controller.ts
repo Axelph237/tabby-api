@@ -1,7 +1,6 @@
 import { Elysia } from 'elysia'
 import { auth } from '@middlewares/auth'
 import { ServiceError } from '@utils/types/serviceError'
-import { db } from '@config/db'
 import { sql } from 'bun'
 import { UUID } from '@utils/types/uuid'
 import { Order, OrderLineItem } from './order.validation'
@@ -14,8 +13,7 @@ export const orderController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "orderController"
 })
 	.use(auth)
-	.use(db({ name: "orderControllerPool" }))
-	.resolve({ as: "scoped" }, ({ pool, user }) => {
+	.resolve({ as: "scoped" }, ({ user }) => {
 		const userId = user?.id ?? null;
 
 		return {
@@ -28,7 +26,7 @@ export const orderController = (init?: ControllerConfig) => new Elysia({
 					sessionId: UUID
 				): Promise<Order[]> => {
 					try {
-						return await pool`
+						return await sql`
 							WITH valid_session AS (
 							    SELECT sessions.id
 							    FROM public.sessions
@@ -59,7 +57,7 @@ export const orderController = (init?: ControllerConfig) => new Elysia({
 					items: Omit<OrderLineItem, "id" | "order_id" | "unit_price">[]
 				): Promise<number> => {
 					try {
-						return await pool.begin(async tx => {
+						return await sql.begin(async tx => {
 							// Create order
 							const [order] = await tx`
 								INSERT INTO public.orders (guest_name, session_id, placed_at, status)
@@ -87,7 +85,7 @@ export const orderController = (init?: ControllerConfig) => new Elysia({
 					orderId: number
 				): Promise<void> => {
 					try {
-						await pool`
+						await sql`
 							WITH user_sessions AS (
 							    SELECT session_id as id
 							    FROM public.session_admins

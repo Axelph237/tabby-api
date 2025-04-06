@@ -2,9 +2,9 @@ import { Elysia, t } from 'elysia'
 import { auth } from '@middlewares/auth'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
-import { db } from '@config/db'
 import { UUID } from '@utils/types/uuid'
 import { SessionDetails, sessionDetailsObj } from './session.validation'
+import { sql } from 'bun'
 
 interface ControllerConfig {
 	name?: string
@@ -14,8 +14,7 @@ export const sessionController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "sessionController"
 })
 	.use(auth)
-	.use(db({ name: "sessionControllerPool" }))
-	.resolve({ as: "scoped" }, ({ pool, user }) => {
+	.resolve({ as: "scoped" }, ({ user }) => {
 		const userId = user?.id ?? null;
 
 		return {
@@ -28,7 +27,7 @@ export const sessionController = (init?: ControllerConfig) => new Elysia({
 					sessionId: UUID
 				): Promise<SessionDetails> => {
 					try {
-						const [result] = await pool`
+						const [result] = await sql`
 							SELECT * FROM public.get_session_details(${sessionId});`;
 						Value.Assert(sessionDetailsObj, result);
 						return result;

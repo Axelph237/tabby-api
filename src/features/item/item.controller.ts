@@ -2,7 +2,6 @@ import { Elysia, t } from 'elysia'
 import { auth } from '@middlewares/auth'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
-import { db } from '@config/db'
 import { sql } from 'bun'
 import {
 	Item,
@@ -23,8 +22,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "itemController"
 })
 	.use(auth)
-	.use(db({ name: "itemControllerPool" }))
-	.resolve({ as: "scoped" }, ({ pool, user }) => {
+	.resolve({ as: "scoped" }, ({ user, payload }) => {
 		const userId = user?.id ?? null;
 
 		return {
@@ -35,7 +33,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 				getItems: async (): Promise<ItemDetails[]> => {
 					try {
 						// Function abstracted for better management
-						const result = await pool`
+						const result = await sql`
 							SELECT * FROM public.get_user_items(${userId});`;
 						Value.Assert(t.Array(itemDetailsObj), result)
 
@@ -51,16 +49,18 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 				 */
 				createItem: async (
 					item: Omit<Item, 'id' | 'created_by' | 'created_at'>
-				): Promise<number> => {
+				): Promise<{ item_id: number }> => {
 					try {
-						const [resultItem] = await pool`
+						const [resultItem] = await sql`
 							INSERT INTO public.items ${sql({
 								...item,
 								created_by: userId,
 							})} RETURNING id;`;
 						Value.Assert(t.Integer(), resultItem.id)
 
-						return resultItem.id
+						return {
+							item_id: resultItem.id
+						}
 					} catch (e) {
 						throw new ServiceError('Failed to create new item.', e)
 					}
@@ -74,7 +74,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					itemIds: number[]
 				): Promise<void> => {
 					try {
-						await pool`
+						await sql`
 							DELETE FROM public.items 
 							WHERE created_by = ${userId} 
 							  AND id = ANY ${itemIds};`;
@@ -94,7 +94,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					updateVals: Partial<Omit<Item, "id" | "created_by" | "created_at">>
 				): Promise<Item> => {
 					try {
-						const [item] = await pool`
+						const [item] = await sql`
 							UPDATE public.items SET ${sql(updateVals)} 
 							WHERE created_by = ${userId} 
 							  AND id = ${itemId} RETURNING *;`;
@@ -118,7 +118,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					newOpt: Omit<ItemOption, 'id' | 'created_by' | 'item_id'>
 				): Promise<ItemOption> => {
 					try {
-						const [option] = await pool`
+						const [option] = await sql`
 							INSERT INTO public.item_options ${sql({
 								...newOpt,
 								created_by: userId,
@@ -140,7 +140,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					optionIds: number[]
 				): Promise<void> => {
 					try {
-						await pool`DELETE FROM public.item_options 
+						await sql`DELETE FROM public.item_options 
        						WHERE created_by = ${userId}
        			  			  AND id = ANY ${optionIds};`;
 					} catch (e) {
@@ -159,7 +159,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					updates: Partial<ItemOption>
 				): Promise<ItemOption> => {
 					try {
-						const [updated] = await pool`
+						const [updated] = await sql`
 							UPDATE public.item_options SET ${sql(updates)}
 							WHERE created_by = ${userId}
 							  AND id = ${optionId}
@@ -183,7 +183,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					selection: Omit<ItemSelection, "id" | "created_by" | "item_id">
 				): Promise<ItemSelection> => {
 					try {
-						const [sel] = await pool`
+						const [sel] = await sql`
 							INSERT INTO public.item_selections ${sql({
 								...selection,
 								created_by: userId,
@@ -204,7 +204,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					selectionIds: number[]
 				): Promise<void> => {
 					try {
-						const result = await pool`
+						const result = await sql`
 							DELETE FROM public.item_selections
 							WHERE created_by = ${userId}
 							  AND id = ANY ${selectionIds};`;
@@ -224,7 +224,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 					updates: Partial<Omit<ItemSelection, "id" | "created_by" | "created_at">>
 				): Promise<ItemSelection> => {
 					try {
-						const [updated] = await pool`
+						const [updated] = await sql`
 							UPDATE public.item_selections SET ${sql(updates)}
 							WHERE created_by = ${userId}
 							  AND id = ${selectionId}

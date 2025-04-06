@@ -4,10 +4,12 @@ import { itemRoutes } from '@features/item/item.routes'
 import { orderRoutes } from '@features/order/order.routes'
 import { menuRoutes } from '@features/menu/menu.routes'
 import { sessionRoutes } from '@features/session/session.routes'
+import { logger } from '@middlewares/logger'
 
 const port = process.env.PORT || 3000
 
 const app = new Elysia()
+	.use(logger)
 	.error({
 		SERVICE: ServiceError
 	})
@@ -27,6 +29,6 @@ const app = new Elysia()
 	.use(sessionRoutes)
 	.listen(port)
 
-console.log(
-	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-)
+// console.log(
+// 	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+// )

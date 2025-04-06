@@ -1,10 +1,10 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '../../middlewares/auth'
+import { auth } from '@middlewares/auth'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
-import { db } from '@config/db'
 import { UUID } from '@utils/types/uuid'
 import { Menu, menuObj } from './menu.validation'
+import { sql } from 'bun'
 
 interface ControllerConfig {
 	name?: string
@@ -14,8 +14,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "menuController"
 })
 	.use(auth)
-	.use(db({ name: "menuControllerPool" }))
-	.resolve({ as: "scoped" }, ({ pool, user }) => {
+	.resolve({ as: "scoped" }, ({ user }) => {
 		const userId = user?.id ?? null;
 
 		return {
@@ -25,7 +24,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 					menuId: UUID
 				): Promise<Menu> => {
 					try {
-						const [menu] = await pool`
+						const [menu] = await sql`
 							SELECT *
 							FROM public.menus
 							WHERE id = ${menuId} AND created_by = ${userId};`;
@@ -41,7 +40,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 				 */
 				getUserMenus: async (): Promise<Menu[]> => {
 					try {
-						const result = await pool`
+						const result = await sql`
 							SELECT *
 							FROM public.menus
 							WHERE created_by = ${userId};`;
@@ -61,7 +60,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 					name: string
 				): Promise<Menu> => {
 					try {
-						const [menu] = await pool`
+						const [menu] = await sql`
 							INSERT INTO public.menus (name, created_by)
 							VALUES (${name}, ${userId})
 							RETURNING *;`;
@@ -82,7 +81,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 					itemId: number
 				): Promise<void> => {
 					try {
-						await pool`
+						await sql`
 							WITH valid_item AS (
 								SELECT id FROM public.items
 								WHERE id = ${itemId} AND created_by = ${userId}
@@ -111,7 +110,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 					itemId: number
 				): Promise<void> => {
 					try {
-						pool`
+						sql`
                 			WITH valid_item AS (
                 			    SELECT id FROM public.items
                 			    WHERE id = ${itemId} AND created_by = ${userId}

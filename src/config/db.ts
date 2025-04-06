@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { SQL } from 'bun'
+import { sql, SQL } from 'bun'
 
 const pgUser = process.env.PG_USER ?? 'postgres'
 const pgPassword = process.env.PG_PASSWORD ?? 'postgres'
@@ -14,4 +14,4 @@ interface DBConfig {
 export const db = async (init?: DBConfig) => new Elysia({
 	name: init?.name ?? "db",
 })
-	.decorate('pool', await (new SQL(dbConnectionUri).connect()))
+	.decorate('pool', new SQL())

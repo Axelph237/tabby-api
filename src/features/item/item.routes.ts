@@ -26,7 +26,9 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 		return await ic.createItem(body);
 	}, {
 		body: t.Omit(itemObj, ignoredKeys),
-		response: t.Integer()
+		response: t.Object({
+			item_id: t.Integer()
+		})
 	})
 	// 2.3 - Delete items
 	.delete("/", async ({ body, ic }) => {
@@ -44,75 +46,73 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 			itemId: t.Integer()
 		})
 	}, app => app
-			// 2.4 - Update item
-			.put("/", async ({ params, body, ic }) => {
-				return await ic.updateItem(params.itemId, body);
-			}, {
-				body: t.Partial(t.Omit(itemObj, ignoredKeys)),
-				response: itemObj
-			})
-
-			// OPTIONS
-			// 2.5 - Create option
-			.post("/options", async ({ params, body, ic}) => {
-				// @ts-ignore
-				return await ic.createOption(params.itemId, body);
-			},{
-				body: t.Omit(itemOptionObj, ignoredKeys),
-				response: itemOptionObj
-			})
-			// 2.6 - Remove options
-			.delete("/options", async ({body, ic }) => {
-				await ic.deleteOptions(body);
-				return {
-					message: "Successfully deleted options from item."
-				}
-			}, {
-				body: t.Array(t.Integer()),
-				response: messageResponseObj
-			})
-			// 2.7 - Update option
-			.put("/options/:optionId", async ({ params, body, ic }) => {
-				return await ic.updateOption(params.optionId, body);
-			}, {
-				params: t.Object({
-					optionId: t.Integer()
-				}),
-				body: t.Partial(t.Omit(itemOptionObj, ignoredKeys)),
-				response: itemOptionObj
-			})
-
-			// SELECTIONS
-			// 2.8 - Create selection
-			.post("/selections", async ({  params, body, ic }) => {
-				return await ic.createSelection(params.itemId, body);
-			}, {
-				body: t.Object({
-					parent_option: t.Nullable(t.Integer()),
-					label: t.String(),
-					price: t.Integer(),
-					is_default: t.Boolean()
-				}),
-				response: itemSelectObj
-			})
-			// 2.9 - Delete selections
-			.delete("/selections", async ({  body, ic }) => {
-				await ic.deleteSelections(body)
-				return {
-					message: "Successfully deleted selections."
-				}
-			}, {
-				body: t.Array(t.Integer()),
-				response: messageResponseObj
-			})
-			// 2.10 - Update selection
-			.put("/selections/:selId", async ({ params, body, ic }) => {
-				return await ic.updateSelection(params.selId, body);
-			}, {
-				params: t.Object({
-					selId: t.Integer()
-				}),
-				body: t.Partial(t.Omit(itemSelectObj, ignoredKeys)),
-				response: itemSelectObj
-			})
+		// 2.4 - Update item
+		.put("/", async ({ params, body, ic }) => {
+			return await ic.updateItem(params.itemId, body);
+		}, {
+			body: t.Partial(t.Omit(itemObj, ignoredKeys)),
+			response: itemObj
+		})
+		// OPTIONS
+		// 2.5 - Create option
+		.post("/options", async ({ params, body, ic}) => {
+			// @ts-ignore
+			return await ic.createOption(params.itemId, body);
+		},{
+			body: t.Omit(itemOptionObj, [...ignoredKeys, "item_id"]),
+			response: itemOptionObj
+		})
+		// 2.6 - Remove options
+		.delete("/options", async ({body, ic }) => {
+			await ic.deleteOptions(body);
+			return {
+				message: "Successfully deleted options from item."
+			}
+		}, {
+			body: t.Array(t.Integer()),
+			response: messageResponseObj
+		})
+		// 2.7 - Update option
+		.put("/options/:optionId", async ({ params, body, ic }) => {
+			return await ic.updateOption(params.optionId, body);
+		}, {
+			params: t.Object({
+				optionId: t.Integer()
+			}),
+			body: t.Partial(t.Omit(itemOptionObj, [...ignoredKeys, "item_id"])),
+			response: itemOptionObj
+		})
+		// SELECTIONS
+		// 2.8 - Create selection
+		.post("/selections", async ({  params, body, ic }) => {
+			return await ic.createSelection(params.itemId, body);
+		}, {
+			body: t.Object({
+				parent_option: t.Nullable(t.Integer()),
+				label: t.String(),
+				price: t.Integer(),
+				is_default: t.Boolean()
+			}),
+			response: itemSelectObj
+		})
+		// 2.9 - Delete selections
+		.delete("/selections", async ({  body, ic }) => {
+			await ic.deleteSelections(body)
+			return {
+				message: "Successfully deleted selections."
+			}
+		}, {
+			body: t.Array(t.Integer()),
+			response: messageResponseObj
+		})
+		// 2.10 - Update selection
+		.put("/selections/:selId", async ({ params, body, ic }) => {
+			return await ic.updateSelection(params.selId, body);
+		}, {
+			params: t.Object({
+				selId: t.Integer()
+			}),
+			body: t.Partial(t.Omit(itemSelectObj, ignoredKeys)),
+			response: itemSelectObj
+		})
 	)
