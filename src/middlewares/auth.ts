@@ -1,7 +1,13 @@
 import { Elysia } from 'elysia'
-import { jwtConfig } from '@config/jwtConfig'
-import jwt from '@elysiajs/jwt'
+import jwt, { JWTOption } from '@elysiajs/jwt'
 import { UUID } from '@utils/types/uuid'
+
+const jwtConfig: JWTOption = {
+	name: "jwt",
+	secret: process.env.JWT_SECRET!,
+	iss: "auth.tabby",
+	aud: "client.tabby"
+}
 
 export const auth = new Elysia({
 	name: "auth"
