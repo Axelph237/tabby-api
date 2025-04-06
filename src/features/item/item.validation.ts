@@ -1,5 +1,5 @@
 import { Static, t } from 'elysia'
-import { uuidObj } from '../../utils/types/uuid'
+import { uuidObj } from '@utils/types/uuid'
 
 export const itemObj = t.Object({
 	id: t.Integer(),

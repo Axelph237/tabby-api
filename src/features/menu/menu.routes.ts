@@ -3,7 +3,7 @@ import { auth } from '@middlewares/auth'
 import { menuController } from './menu.controller'
 import { uuidObj } from '@utils/types/uuid'
 
-export const MenuRoutes = new Elysia({ prefix: '/menus' })
+export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.use(menuController({ name: "mc" }))
 	.use(auth)
 	.guard({

@@ -3,7 +3,7 @@ import { auth } from '@middlewares/auth'
 import { uuidObj } from '@utils/types/uuid'
 import { sessionController } from '@features/session/session.controller'
 
-export const SessionRoutes = new Elysia({ prefix: "/sessions" })
+export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.use(sessionController({
 		name: "sc"
 	}))

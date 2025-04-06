@@ -1,11 +1,12 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '../../middlewares/auth'
-import { ignoredKeys, itemDetailsObj, itemObj, itemOptionObj, itemSelectObj } from '../../+types/schema'
-import { messageResponseObj } from '../../utils/types/messageResponse'
+import { auth } from '@middlewares/auth'
+import { messageResponseObj } from '@utils/types/messageResponse'
 import { itemController } from './item.controller'
+import { itemDetailsObj, itemObj, itemSelectObj, itemOptionObj } from '@features/item/item.validation'
 
+const ignoredKeys = [ "id", "created_at", "created_by" ];
 
-export const ItemRoutes = new Elysia({ prefix: "/items" })
+export const itemRoutes = new Elysia({ prefix: "/items" })
 	.use(itemController({
 		name: "ic"
 	}))

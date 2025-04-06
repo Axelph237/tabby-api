@@ -4,7 +4,7 @@ import { orderController } from './order.controller'
 import { uuidObj } from '@utils/types/uuid'
 import { orderLineItem } from '@features/order/order.validation'
 
-export const OrderRoutes = new Elysia({ prefix: "/orders/:sessId" })
+export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 	.use(orderController({
 		name: "oc"
 	}))

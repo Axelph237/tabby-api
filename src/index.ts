@@ -1,5 +1,9 @@
 import { Elysia } from 'elysia'
-import {ServiceError} from "./utils/types/serviceError";
+import {ServiceError} from "@utils/types/serviceError";
+import { itemRoutes } from '@features/item/item.routes'
+import { orderRoutes } from '@features/order/order.routes'
+import { menuRoutes } from '@features/menu/menu.routes'
+import { sessionRoutes } from '@features/session/session.routes'
 
 const port = process.env.PORT || 3000
 
@@ -17,6 +21,10 @@ const app = new Elysia()
 		}
 	})
 	.get('/', () => 'Hello Elysia')
+	.use(itemRoutes)
+	.use(menuRoutes)
+	.use(orderRoutes)
+	.use(sessionRoutes)
 	.listen(port)
 
 console.log(
