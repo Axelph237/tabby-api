@@ -17,10 +17,6 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-DROP SCHEMA IF EXISTS public CASCADE;
-CREATE SCHEMA public;
-
-
 --
 -- Roles
 --
@@ -184,36 +180,39 @@ BEGIN
 -- Reduce join complexity
 WITH user_items AS (
   SELECT items.id, items.name, items.description, items.img_url, items.base_price, items.created_by
-  FROM items
+  FROM public.items
   WHERE items.created_by = p_user_id
 ), user_opts AS (
   SELECT item_options.item_id, item_options.id, item_options.label, item_options.type
-  FROM item_options
+  FROM public.item_options
   WHERE item_options.created_by = p_user_id
 ),
 -- CREATE OBJECTS FROM TABLES
 select_objs AS (
-  SELECT item_selections.parent_option, COALESCE(jsonb_agg(
+  SELECT COALESCE(item_selections.parent_option, 0) as parent_option,
+         item_selections.item_id as parent_item,
+         COALESCE(jsonb_agg(
     jsonb_build_object(
         'label', label,
         'price', COALESCE(price, 0),
         'is_default', COALESCE(is_default, FALSE)
       )
     ), '[]'::jsonb) AS selections
-  FROM item_selections
+  FROM public.item_selections
   WHERE item_selections.created_by = p_user_id
-  GROUP BY item_selections.parent_option
+  GROUP BY parent_option, item_id
 ), option_objs AS (
-  SELECT user_opts.item_id, COALESCE(jsonb_agg(
+  SELECT select_objs.parent_item, COALESCE(jsonb_agg(
     jsonb_build_object(
-      'label', user_opts.label,
-      'type', user_opts.type,
+      'label', COALESCE(user_opts.label, '_root'),
+      'type', COALESCE(user_opts.type, 'many'),
       'selections', select_objs.selections
     )
   ), '[]'::jsonb) AS options
-  FROM user_opts
-  JOIN select_objs ON select_objs.parent_option = user_opts.id
-  GROUP BY user_opts.item_id
+  FROM select_objs
+-- OUTER JOIN ON PARENT_OPTION FOR ROOT COALESCING
+  FULL OUTER JOIN user_opts ON select_objs.parent_option = user_opts.id
+  GROUP BY select_objs.parent_item
 )
 -- PRESENT DATA
 SELECT
@@ -225,7 +224,7 @@ SELECT
   user_items.base_price,
   COALESCE(option_objs.options, '[]'::jsonb)
 FROM user_items
-LEFT JOIN option_objs ON option_objs.item_id = user_items.id;
+LEFT JOIN option_objs ON option_objs.parent_item = user_items.id;
 END;
 $$;
 ALTER FUNCTION public.get_user_items(p_user_id uuid) OWNER TO neondb_owner;
