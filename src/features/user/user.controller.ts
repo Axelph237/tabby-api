@@ -1,18 +1,18 @@
 import { Elysia, t } from 'elysia'
-import { PgsqlService } from '../services/psql.service'
+import { PgsqlService } from '../../config/db'
 import {
     itemObject,
     itemOptionObj,
     itemSelectObj,
     menuObj,
     uuidObj
-} from "../+types/schema";
+} from "../../+types/schema";
 import {Value} from "@sinclair/typebox/value";
 
 /**
  * @deprecated - Use other controllers for a better alternative
  */
-export const UsersController = new Elysia({ prefix: "/users/:userId" })
+export const UserController = new Elysia({ prefix: "/users/:userId" })
     .derive(() => {
         return {
             db: PgsqlService.getInstance()

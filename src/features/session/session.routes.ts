@@ -1,17 +1,15 @@
 import { Elysia, t } from 'elysia'
-import { PgsqlService } from '../services/psql.service'
-import { uuidObj } from '../+types/schema'
-import { jwtCheckerPlugin } from '../plugins/jwt-checker.plugin'
+import { auth } from '@middlewares/auth'
+import { uuidObj } from '@utils/types/uuid'
+import { sessionController } from '@features/session/session.controller'
 
-export const SessionController = new Elysia({ prefix: "/sessions" })
-	.use(jwtCheckerPlugin)
+export const SessionRoutes = new Elysia({ prefix: "/sessions" })
+	.use(sessionController({
+		name: "sc"
+	}))
+	.use(auth)
 	.guard({
 		isAuthenticated: true
-	})
-	.derive(() => {
-		return {
-			db: PgsqlService.getInstance()
-		}
 	})
 	// 4.1
 	.post("/", ({ body, user, db }) => {

@@ -397,6 +397,27 @@ _Registered user must be owner of the menu_
 **URL:** `sessions/:sessId`
 _Registered user must be session admin._
 
+### 4.3 `GET` Session details.
+
+#### Response
+
+```json
+{
+  "menu_name": string,
+  "expires_at": Date,
+  "items": [
+    {
+      "id": number,
+      "name": string,
+      "description": string | null,
+      "img_url": uri | null,
+      "base_price": number
+    },
+    ...
+  ]
+}
+```
+
 
 ## Deprecated
 ### #. Carts

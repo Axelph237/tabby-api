@@ -78,7 +78,7 @@ describe('menus', () => {
 		const menu = await testPgService.createMenu('Menu 3', userId)
 		expect(menu!.id).toBeTruthy()
 
-		const items = await testPgService.getUserItems(userId)
+		const items = await testPgService.getItems(userId)
 		expect(items!.length).toBeGreaterThan(0)
 
 		const result = await testPgService.addItemToMenu(menu!.id, items![0].id)
@@ -106,7 +106,7 @@ describe('items', () => {
 	test("get user's items", async () => {
 		const userId = testUsers[0].id
 
-		const result = await testPgService.getUserItems(userId)
+		const result = await testPgService.getItems(userId)
 		expect(result?.length).toBe(6)
 	})
 

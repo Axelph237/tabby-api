@@ -79,8 +79,8 @@ $$;
 
 
 -- DEPRECATED
--- Name: getcart_items(integer); Type: FUNCTION; Schema: public; Owner: neondb_owner
-CREATE OR REPLACE FUNCTION public.getcart_items(p_cartId integer)
+-- Name: get_cart_items(integer); Type: FUNCTION; Schema: public; Owner: neondb_owner
+CREATE OR REPLACE FUNCTION public.get_cart_items(p_cartId integer)
     RETURNS TABLE(
         cart_item_id integer,
         item_id integer,
@@ -102,15 +102,15 @@ BEGIN
         WHERE cart_id = p_cartId
     ), sels AS (
         SELECT
-            ios.option_id,
+            ios.parent_option,
             jsonb_agg(jsonb_build_object(
                 'label', ios.label,
                 'price', ios.price
             )) as selections
         FROM cart_item_selections as cis
-        JOIN item_option_selections as ios ON ios.id = cis.option_selection
+        JOIN item_selections as ios ON ios.id = cis.option_selection
         WHERE EXISTS (SELECT 1 FROM ci WHERE ci.id = cis.cart_item_id)
-        GROUP BY ios.option_id
+        GROUP BY ios.parent_option
     )
     SELECT
         ci.id as cart_item_id,
@@ -127,7 +127,7 @@ BEGIN
                 'selections', sels.selections
             )), '[]'::jsonb)
             FROM sels
-            JOIN item_options as io ON io.id = sels.option_id
+            JOIN item_options as io ON io.id = sels.parent_option
         ) as options
     FROM ci
     JOIN items as i ON i.id = ci.item_id;
@@ -193,16 +193,16 @@ WITH user_items AS (
 ),
 -- CREATE OBJECTS FROM TABLES
 select_objs AS (
-  SELECT item_option_selections.option_id, COALESCE(jsonb_agg(
+  SELECT item_selections.parent_option, COALESCE(jsonb_agg(
     jsonb_build_object(
         'label', label,
         'price', COALESCE(price, 0),
         'is_default', COALESCE(is_default, FALSE)
       )
     ), '[]'::jsonb) AS selections
-  FROM item_option_selections
-  WHERE item_option_selections.created_by = p_user_id
-  GROUP BY item_option_selections.option_id
+  FROM item_selections
+  WHERE item_selections.created_by = p_user_id
+  GROUP BY item_selections.parent_option
 ), option_objs AS (
   SELECT user_opts.item_id, COALESCE(jsonb_agg(
     jsonb_build_object(
@@ -212,7 +212,7 @@ select_objs AS (
     )
   ), '[]'::jsonb) AS options
   FROM user_opts
-  JOIN select_objs ON select_objs.option_id = user_opts.id
+  JOIN select_objs ON select_objs.parent_option = user_opts.id
   GROUP BY user_opts.item_id
 )
 -- PRESENT DATA
@@ -229,6 +229,50 @@ LEFT JOIN option_objs ON option_objs.item_id = user_items.id;
 END;
 $$;
 ALTER FUNCTION public.get_user_items(p_user_id uuid) OWNER TO neondb_owner;
+
+
+-- Name: get_session_details(integer); Type: FUNCTION; Schema: public; Owner: neondb_owner
+CREATE OR REPLACE FUNCTION public.get_session_details(p_session_id uuid)
+    RETURNS TABLE(
+        menu_name text,
+        expires_at timestamp with time zone,
+        items jsonb
+    )
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+        WITH session_menu AS (
+            SELECT
+                m.id AS menu_id,
+                s.id AS session_id,
+                m.name AS menu_name,
+                s.expires_at
+            FROM public.sessions AS s
+            JOIN public.menus AS m ON s.menu_id = m.id
+            WHERE s.id = p_session_id
+        ), items_on_menu AS (
+            SELECT *
+            FROM items_to_menus AS itm
+            WHERE itm.menu_id = (SELECT menu_id FROM session_menu)
+        )
+        SELECT
+            sm.menu_name,
+            sm.expires_at,
+            (
+                SELECT COALESCE(jsonb_agg(jsonb_build_object(
+                        'id', i.id,
+                        'name', i.name,
+                        'description', i.description,
+                        'img_url', i.img_url,
+                        'base_price', i.base_price
+                )), '[]'::jsonb)
+                FROM items AS i
+                JOIN items_on_menu AS iom ON iom.item_id = i.id
+            ) as options
+        FROM session_menu AS sm;
+END;
+$$;
 
 
 --
@@ -266,7 +310,7 @@ RETURNS TRIGGER AS $$
 BEGIN
   NEW.unit_price := (
     SELECT SUM(COALESCE(price, 0))
-    FROM item_option_selections AS ios
+    FROM item_selections AS ios
     WHERE ios.id = ANY (NEW.selections)
   );
   RETURN NEW;
@@ -313,18 +357,19 @@ CREATE TABLE public.carts (
 ALTER TABLE public.carts OWNER TO neondb_owner;
 
 
--- Name: item_option_selections; Type: TABLE; Schema: public; Owner: neondb_owner
-CREATE TABLE public.item_option_selections (
+-- Name: item_selections; Type: TABLE; Schema: public; Owner: neondb_owner
+CREATE TABLE public.item_selections (
     id serial NOT NULL,
-    option_id integer NOT NULL,
+    item_id integer NOT NULL,
+    parent_option integer,
     label text NOT NULL,
     price integer,
     is_default boolean DEFAULT false,
     created_by uuid,
     PRIMARY KEY (id),
-    UNIQUE (option_id, label)
+    UNIQUE (parent_option, item_id, label)
 );
-ALTER TABLE public.item_option_selections OWNER TO neondb_owner;
+ALTER TABLE public.item_selections OWNER TO neondb_owner;
 
 
 -- Name: item_options; Type: TABLE; Schema: public; Owner: neondb_owner
@@ -385,12 +430,22 @@ CREATE TABLE public.sessions (
 ALTER TABLE public.sessions OWNER TO neondb_owner;
 
 
+-- Name: session_admins
+CREATE TABLE public.session_admins (
+    session_id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    PRIMARY KEY (session_id, user_id)
+);
+ALTER TABLE public.session_admins OWNER TO neondb_owner;
+
+
 -- Name: orders
 CREATE TABLE public.orders (
     id serial NOT NULL,
+    placed_at timestamp NOT NULL,
     session_id uuid NOT NULL,
     guest_name text NOT NULL,
-    order_num integer NOT NULL,
+    order_num integer,
     total_cost integer DEFAULT 0 NOT NULL,
     total_items integer DEFAULT 0 NOT NULL,
     status text NOT NULL,
@@ -429,7 +484,7 @@ ALTER TABLE ONLY public.cart_item_selections
     ADD CONSTRAINT cart_item_id_fkey FOREIGN KEY (cart_item_id) REFERENCES public.cart_items(id);
 
 ALTER TABLE ONLY public.cart_item_selections
-    ADD CONSTRAINT option_selection_id_fkey FOREIGN KEY (option_selection) REFERENCES public.item_option_selections(id);
+    ADD CONSTRAINT option_selection_id_fkey FOREIGN KEY (option_selection) REFERENCES public.item_selections(id);
 
 -- Table: public.cart_items
 ALTER TABLE ONLY public.cart_items
@@ -442,9 +497,11 @@ ALTER TABLE ONLY public.cart_items
 ALTER TABLE ONLY public.carts
     ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
--- Table: public.item_option_selections
-ALTER TABLE ONLY public.item_option_selections
-    ADD CONSTRAINT option_id_fkey FOREIGN KEY (option_id) REFERENCES public.item_options(id);
+-- Table: public.item_selections
+ALTER TABLE ONLY public.item_selections
+    ADD CONSTRAINT parent_option_fkey FOREIGN KEY (parent_option) REFERENCES public.item_options(id);
+ALTER TABLE ONLY public.item_selections
+    ADD CONSTRAINT item_id_fkey FOREIGN KEY (item_id) REFERENCES public.items(id);
 
 -- Table: public.item_options
 ALTER TABLE ONLY public.item_options
@@ -460,12 +517,16 @@ ALTER TABLE ONLY public.items_to_menus
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id);
 
+-- Table: public.session_admins
+ALTER TABLE ONLY public.session_admins
+    ADD CONSTRAINT menu_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id);
+
 --
 -- Indexes
 --
 
--- Name: item_option_selections_created_by_hash; Type: INDEX; Schema: public; Owner: neondb_owner
-CREATE INDEX item_option_selections_created_by_hash ON public.item_option_selections USING hash (created_by);
+-- Name: item_selections_created_by_hash; Type: INDEX; Schema: public; Owner: neondb_owner
+CREATE INDEX item_selections_created_by_hash ON public.item_selections USING hash (created_by);
 
 -- Name: item_options_created_by_hash; Type: INDEX; Schema: public; Owner: neondb_owner
 CREATE INDEX item_options_created_by_hash ON public.item_options USING hash (created_by);

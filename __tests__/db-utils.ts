@@ -1,5 +1,5 @@
 import * as child_process from 'node:child_process'
-import { PgsqlService } from '../services/psql.service'
+import { PgsqlService } from '../src/config/db'
 import { randomUUIDv7, sql, SQL } from 'bun'
 
 const pgUser = process.env.PG_USER ?? 'postgres'

@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import {ServiceError} from "./+types/errors";
+import {ServiceError} from "./utils/types/serviceError";
 
 const port = process.env.PORT || 3000
 
