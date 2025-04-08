@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { authMiddleware } from '@middlewares/authMiddleware'
+import { authMiddleware } from '@middlewares/auth.middleware'
 import { messageResponseObj } from '@utils/types/messageResponse'
 import { itemController } from './item.controller'
 import { itemDetailsObj, itemObj, itemSelectObj, itemOptionObj } from '@features/item/item.validation'

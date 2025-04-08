@@ -12,7 +12,7 @@ interface ControllerConfig {
 export const authController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "authController"
 })
-	.decorate('loginCallback', process.env.LOGIN_CALLBACK ?? "http://localhost:5173/login/complete")
+	.decorate('loginCallback', process.env.LOGIN_CALLBACK ?? "http://localhost:5173/login/callback")
 	.resolve(() => {
 		return {
 			[init?.name ?? "authController"]: {

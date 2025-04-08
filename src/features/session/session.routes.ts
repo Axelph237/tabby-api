@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { authMiddleware } from '@middlewares/authMiddleware'
+import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidObj } from '@utils/types/uuid'
 import { sessionController } from '@features/session/session.controller'
 
