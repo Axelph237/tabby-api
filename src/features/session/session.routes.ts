@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '@middlewares/auth'
+import { authMiddleware } from '@middlewares/authMiddleware'
 import { uuidObj } from '@utils/types/uuid'
 import { sessionController } from '@features/session/session.controller'
 
@@ -7,7 +7,7 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.use(sessionController({
 		name: "sc"
 	}))
-	.use(auth)
+	.use(authMiddleware)
 	.guard({
 		isAuthenticated: true
 	})

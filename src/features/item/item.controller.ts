@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '@middlewares/auth'
+import { authMiddleware } from '@middlewares/authMiddleware'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
 import { sql } from 'bun'
@@ -21,8 +21,8 @@ interface ControllerConfig {
 export const itemController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "itemController"
 })
-	.use(auth)
-	.resolve({ as: "scoped" }, ({ user, payload }) => {
+	.use(authMiddleware)
+	.resolve(({ user, payload }) => {
 		const userId = user?.id ?? null;
 
 		return {
@@ -237,3 +237,4 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 			}
 		}
 	})
+	.as("plugin")

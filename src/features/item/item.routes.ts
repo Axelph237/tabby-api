@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '@middlewares/auth'
+import { authMiddleware } from '@middlewares/authMiddleware'
 import { messageResponseObj } from '@utils/types/messageResponse'
 import { itemController } from './item.controller'
 import { itemDetailsObj, itemObj, itemSelectObj, itemOptionObj } from '@features/item/item.validation'
@@ -10,7 +10,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 	.use(itemController({
 		name: "ic"
 	}))
-	.use(auth)
+	.use(authMiddleware)
 	.guard({
 		isAuthenticated: true
 	})

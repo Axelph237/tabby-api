@@ -1,18 +1,19 @@
 import { Elysia } from 'elysia'
-import jwt, { JWTOption } from '@elysiajs/jwt'
+// import jwt, { JWTOption } from '@elysiajs/jwt'
 import { UUID } from '@utils/types/uuid'
+import { jwtPlugin } from '@config/jwt'
 
-const jwtConfig: JWTOption = {
-	name: "jwt",
-	secret: process.env.JWT_SECRET!,
-	iss: "auth.tabby",
-	aud: "client.tabby"
-}
+// const jwtConfig: JWTOption = {
+// 	name: "jwt",
+// 	secret: process.env.JWT_SECRET!,
+// 	iss: "auth.tabby",
+// 	aud: "client.tabby"
+// }
 
-export const auth = new Elysia({
+export const authMiddleware = new Elysia({
 	name: "auth"
 })
-	.use(jwt(jwtConfig))
+	.use(jwtPlugin)
 	.derive({ as: "scoped" }, async ({ jwt, cookie: { auth } }) => {
 		const payload = await jwt.verify(auth.value);
 		return {

@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { auth } from '@middlewares/auth'
+import { authMiddleware } from '@middlewares/authMiddleware'
 import { ServiceError } from '@utils/types/serviceError'
 import { sql } from 'bun'
 import { UUID } from '@utils/types/uuid'
@@ -12,8 +12,8 @@ interface ControllerConfig {
 export const orderController = (init?: ControllerConfig) => new Elysia({
 	name: init?.name ?? "orderController"
 })
-	.use(auth)
-	.resolve({ as: "scoped" }, ({ user }) => {
+	.use(authMiddleware)
+	.resolve(({ user }) => {
 		const userId = user?.id ?? null;
 
 		return {
@@ -110,3 +110,4 @@ export const orderController = (init?: ControllerConfig) => new Elysia({
 			}
 		}
 	})
+	.as("plugin")

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '@middlewares/auth'
+import { authMiddleware } from '@middlewares/authMiddleware'
 import { orderController } from './order.controller'
 import { uuidObj } from '@utils/types/uuid'
 import { orderLineItem } from '@features/order/order.validation'
@@ -8,7 +8,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 	.use(orderController({
 		name: "oc"
 	}))
-	.use(auth)
+	.use(authMiddleware)
 	.guard({
 		params: t.Object({
 			sessId: uuidObj

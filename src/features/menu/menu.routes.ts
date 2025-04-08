@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia'
-import { auth } from '@middlewares/auth'
+import { authMiddleware } from '@middlewares/authMiddleware'
 import { menuController } from './menu.controller'
 import { uuidObj } from '@utils/types/uuid'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.use(menuController({ name: "mc" }))
-	.use(auth)
+	.use(authMiddleware)
 	.guard({
 		isAuthenticated: true
 	})
