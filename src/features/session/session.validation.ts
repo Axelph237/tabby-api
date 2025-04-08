@@ -11,7 +11,7 @@ export type Session = Static<typeof session>;
 
 export const sessionDetailsObj = t.Object({
 	menu_name: t.String(),
-	expires_at: t.Date(),
+	expires_at: t.Nullable(t.Date()),
 	items: t.Array(t.Omit(itemObj, [ "created_by", "created_at" ]))
 })
 export type SessionDetails = Static<typeof sessionDetailsObj>;

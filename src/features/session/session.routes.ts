@@ -34,11 +34,11 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 		},
 		app => app
 			// 4.2 - Close session
-			.delete("/:sessId", ({  }) => {
+			.delete("/", ({  }) => {
 				return "STUB ROUTE"
 			})
 			// 4.3 - Get session public details
-			.get("/:sessId", ({ params, sc }) => {
+			.get("/", ({ params, sc }) => {
 				return sc.getSessionDetails(params.sessId);
 			})
 	)

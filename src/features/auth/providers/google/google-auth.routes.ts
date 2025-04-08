@@ -23,7 +23,7 @@ export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
 
         return redirect(url.href);
     })
-    .get("/callback", async ({ oauth2, jwt, ac, cookie: { auth }, params }) => {
+    .get("/callback", async ({ oauth2, jwt, ac, cookie: { auth }, redirect, loginCallback }) => {
         // console.log("Callback called.");
         const tokens = await oauth2.authorize("Google");
         const parsedTokens = parseOAuth2Tokens(tokens);
@@ -58,14 +58,9 @@ export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
         auth.set({
             value,
             httpOnly: true,
+            domain: process.env.DOMAIN ?? "localhost",
             maxAge: 60 * 60 * 24 // 1 day
         });
 
-        return {
-            message: "Login successful"
-        };
-    }, {
-        response: t.Object({
-            message: t.String()
-        })
+        return redirect(loginCallback);
     })
