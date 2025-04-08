@@ -64,7 +64,6 @@ export const sessionController = (init?: ControllerConfig) => new Elysia({
 					try {
 						const [result] = await sql`
 							SELECT * FROM public.get_session_details(${sessionId});`;
-						console.log(result)
 						Value.Assert(sessionDetailsObj, result);
 						return result;
 					}

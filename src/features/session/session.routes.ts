@@ -8,14 +8,12 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 		name: "sc"
 	}))
 	.use(authMiddleware)
-	.guard({
-		isAuthenticated: true
-	})
 	// 4.1 - Create new session
 	.post("/", async ({ body, sc }) => {
 		const session_id = await sc.createSession(body.menu_id, body.session_admins, body.expires_at);
 		return { session_id };
 	}, {
+		isAuthenticated: true,
 		body: t.Object({
 			menu_id: uuidObj,
 			session_admins: t.Array(uuidObj),
@@ -36,6 +34,8 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 			// 4.2 - Close session
 			.delete("/", ({  }) => {
 				return "STUB ROUTE"
+			}, {
+				isAuthenticated: true
 			})
 			// 4.3 - Get session public details
 			.get("/", ({ params, sc }) => {
