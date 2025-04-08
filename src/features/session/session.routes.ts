@@ -11,21 +11,35 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.guard({
 		isAuthenticated: true
 	})
-	// 4.1
-	.post("/", ({ body, user, db }) => {
-		return body
+	// 4.1 - Create new session
+	.post("/", async ({ body, sc }) => {
+		const session_id = await sc.createSession(body.menu_id, body.session_admins, body.expires_at);
+		return { session_id };
 	}, {
 		body: t.Object({
 			menu_id: uuidObj,
 			session_admins: t.Array(uuidObj),
-			end_time: t.Date()
+			expires_at: t.Date()
+		}),
+		response: t.Object({
+			session_id: uuidObj
 		})
 	})
-	// 4.2
-	.delete("/:sessId", ({ params, user, db }) => {
-		return params
-	}, {
-		params: t.Object({
-			sessId: uuidObj
-		})
-	})
+	.group(
+		"/:sessId",
+		{
+			params: t.Object({
+				sessId: uuidObj
+			})
+		},
+		app => app
+			// 4.2 - Close session
+			.delete("/:sessId", ({  }) => {
+				return "STUB ROUTE"
+			})
+			// 4.3 - Get session public details
+			.get("/:sessId", ({ params, sc }) => {
+				return sc.getSessionDetails(params.sessId);
+			})
+	)
+

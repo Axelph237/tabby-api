@@ -19,6 +19,38 @@ export const sessionController = (init?: ControllerConfig) => new Elysia({
 
 		return {
 			[init?.name ?? "sessionController"]: {
+				createSession: async (
+					menuId: UUID,
+					admins: UUID[],
+					expiresAt?: Date
+				): Promise<UUID> => {
+					try {
+						if (userId && !admins.includes(userId))
+							admins.push(userId);
+
+						return await sql.begin(async tx => {
+							const [sessionId] = await tx`
+								WITH valid_menu AS (
+								    SELECT id
+								    FROM public.menus
+								    WHERE created_by = ${userId}
+								)
+								INSERT INTO public.sessions (menu_id, expires_at)
+								VALUES (${menuId}, ${expiresAt ?? null});`;
+
+							await tx`
+								INSERT INTO public.session_admins ${sql(
+									admins.map(id => ({ user_id: id, session_id: sessionId }))
+								)};`;
+
+							return sessionId;
+						})
+					}
+					catch (e) {
+						throw new ServiceError("Failed to create session.", e);
+					}
+				},
+
 				/**
 				 * 4.3 - Get session details.
 				 * @param sessionId - The session to get.

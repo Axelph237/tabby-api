@@ -423,7 +423,7 @@ ALTER TABLE public.menus OWNER TO neondb_owner;
 CREATE TABLE public.sessions (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     menu_id uuid NOT NULL,
-    expires_at timestamp with time zone,
+    expires_at timestamp,
     PRIMARY KEY (id)
 );
 ALTER TABLE public.sessions OWNER TO neondb_owner;
