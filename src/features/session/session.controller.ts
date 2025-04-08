@@ -29,21 +29,24 @@ export const sessionController = (init?: ControllerConfig) => new Elysia({
 							admins.push(userId);
 
 						return await sql.begin(async tx => {
-							const [sessionId] = await tx`
+							const [session] = await tx`
 								WITH valid_menu AS (
 								    SELECT id
 								    FROM public.menus
 								    WHERE created_by = ${userId}
 								)
 								INSERT INTO public.sessions (menu_id, expires_at)
-								VALUES (${menuId}, ${expiresAt ?? null});`;
+								VALUES (${menuId}, ${expiresAt ?? null})
+								RETURNING id;`;
+
+							console.log("Session id:", session.id)
 
 							await tx`
 								INSERT INTO public.session_admins ${sql(
-									admins.map(id => ({ user_id: id, session_id: sessionId }))
+									admins.map(id => ({ user_id: id, session_id: session.id }))
 								)};`;
 
-							return sessionId;
+							return session.id;
 						})
 					}
 					catch (e) {

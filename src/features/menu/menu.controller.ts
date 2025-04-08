@@ -40,7 +40,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 				 */
 				getUserMenus: async (): Promise<Menu[]> => {
 					try {
-						const result = await sql`
+						const [...result] = await sql`
 							SELECT *
 							FROM public.menus
 							WHERE created_by = ${userId};`;

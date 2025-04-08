@@ -19,7 +19,7 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 		body: t.Object({
 			menu_id: uuidObj,
 			session_admins: t.Array(uuidObj),
-			expires_at: t.Date()
+			expires_at: t.Optional(t.Date())
 		}),
 		response: t.Object({
 			session_id: uuidObj
