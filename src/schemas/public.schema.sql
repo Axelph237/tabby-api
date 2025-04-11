@@ -252,7 +252,7 @@ BEGIN
             WHERE s.id = p_session_id
         ), items_on_menu AS (
             SELECT *
-            FROM items_to_menus AS itm
+            FROM public.items_to_menus AS itm
             WHERE itm.menu_id = (SELECT menu_id FROM session_menu)
         )
         SELECT
@@ -266,7 +266,7 @@ BEGIN
                         'img_url', i.img_url,
                         'base_price', i.base_price
                 )), '[]'::jsonb)
-                FROM items AS i
+                FROM public.items AS i
                 JOIN items_on_menu AS iom ON iom.item_id = i.id
             ) as options
         FROM session_menu AS sm;
