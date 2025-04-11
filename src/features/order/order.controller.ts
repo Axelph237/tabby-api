@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { authMiddleware } from '@middlewares/authMiddleware'
+import { authMiddleware } from '@middlewares/auth.middleware'
 import { ServiceError } from '@utils/types/serviceError'
 import { sql } from 'bun'
 import { UUID } from '@utils/types/uuid'

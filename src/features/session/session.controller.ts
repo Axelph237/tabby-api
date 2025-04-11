@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { authMiddleware } from '@middlewares/authMiddleware'
+import { authMiddleware } from '@middlewares/auth.middleware'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
 import { UUID } from '@utils/types/uuid'

@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { authMiddleware } from '@middlewares/authMiddleware'
+import { authMiddleware } from '@middlewares/auth.middleware'
 import { menuController } from './menu.controller'
 import { uuidObj } from '@utils/types/uuid'
 
