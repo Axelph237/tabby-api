@@ -4,6 +4,7 @@ import { itemRoutes } from '@features/item/item.routes'
 import { orderRoutes } from '@features/order/order.routes'
 import { menuRoutes } from '@features/menu/menu.routes'
 import { sessionRoutes } from '@features/session/session.routes'
+import { userRoutes } from '@features/user/user.routes'
 import { authRoutes } from '@features/auth/auth.routes'
 import { logger } from '@middlewares/logger'
 import { corsPlugin } from '@config/cors'
@@ -31,6 +32,7 @@ const app = new Elysia()
 	.use(menuRoutes)
 	.use(orderRoutes)
 	.use(sessionRoutes)
+	.use(userRoutes)
 	.use(authRoutes)
 	.listen(port)
 

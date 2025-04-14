@@ -14,7 +14,7 @@ export const authMiddleware = new Elysia({
 	name: "auth"
 })
 	.use(jwtPlugin)
-	.derive({ as: "scoped" }, async ({ jwt, cookie: { auth } }) => {
+	.derive(async ({ jwt, cookie: { auth } }) => {
 		const payload = await jwt.verify(auth.value);
 		return {
 			payload,
@@ -38,3 +38,4 @@ export const authMiddleware = new Elysia({
 			}
 		}
 	})
+	.as("plugin")

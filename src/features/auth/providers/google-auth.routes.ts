@@ -33,7 +33,8 @@ export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
             `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${parsedTokens.access_token}`,
             { method: "GET" }
         );
-        if (!response.ok) throw new Error("Failed to get user data.");
+        if (!response.ok)
+            throw new Error("Failed to get user data.");
 
         // create user object
         const { email, email_verified, picture } = await response.json();
@@ -49,17 +50,19 @@ export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
         // create jwt
         const value = await jwt.sign({
             sub: userId,
+            "email": user.email,
+            "user_image": user.image,
             iat: Math.floor(Date.now() / 1000),
             exp: Math.floor(parsedTokens.access_token_expires_at.getTime() / 1000)
         });
-        console.log(value);
+        console.log("Generated JWT:", value);
 
         // set http-only cookie
         auth.set({
             value,
             httpOnly: true,
             path: "/",
-            domain: process.env.DOMAIN ?? "localhost",
+            // domain: process.env.DOMAIN ?? "localhost",
             maxAge: 60 * 60 * 24 // 1 day
         });
 
