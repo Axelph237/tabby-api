@@ -58,6 +58,7 @@ export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
         auth.set({
             value,
             httpOnly: true,
+            path: "/",
             domain: process.env.DOMAIN ?? "localhost",
             maxAge: 60 * 60 * 24 // 1 day
         });
