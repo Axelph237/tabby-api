@@ -3,7 +3,7 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
 import { UUID } from '@utils/types/uuid'
-import { Menu, menuObj } from './menu.validation'
+import { Menu, menuTObj } from './menu.validation'
 import { sql } from 'bun'
 
 interface ControllerConfig {
@@ -28,7 +28,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 							SELECT *
 							FROM public.menus
 							WHERE id = ${menuId} AND created_by = ${userId};`;
-						Value.Assert(menuObj, menu);
+						Value.Assert(menuTObj, menu);
 						return menu;
 					} catch (e) {
 						throw new ServiceError('Failed to get menu', e);
@@ -44,7 +44,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 							SELECT *
 							FROM public.menus
 							WHERE created_by = ${userId};`;
-						Value.Assert(t.Array(menuObj), result);
+						Value.Assert(t.Array(menuTObj), result);
 
 						return result;
 					} catch (e) {
@@ -64,7 +64,7 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 							INSERT INTO public.menus (name, created_by)
 							VALUES (${name}, ${userId})
 							RETURNING *;`;
-						Value.Assert(menuObj, menu);
+						Value.Assert(menuTObj, menu);
 						return menu
 					} catch (e) {
 						throw new ServiceError('Failed to create new menu.', e)

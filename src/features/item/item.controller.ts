@@ -7,11 +7,11 @@ import {
 	Item,
 	ItemDetails,
 	itemDetailsObj,
-	itemObj,
+	itemTObj,
 	ItemOption,
-	itemOptionObj,
+	itemOptionTObj,
 	ItemSelection,
-	itemSelectObj,
+	itemSelectTObj,
 } from './item.validation'
 
 interface ControllerConfig {
@@ -99,7 +99,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 							WHERE created_by = ${userId} 
 							  AND id = ${itemId} RETURNING *;`;
 
-						Value.Assert(itemObj, item)
+						Value.Assert(itemTObj, item)
 						return item
 					} catch (e) {
 						throw new ServiceError('Failed to update item.', e)
@@ -124,7 +124,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 								created_by: userId,
 								item_id: itemId,
 							})} RETURNING *;`;
-						Value.Assert(itemOptionObj, option);
+						Value.Assert(itemOptionTObj, option);
 
 						return option
 					} catch (e) {
@@ -189,7 +189,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 								created_by: userId,
 								item_id: itemId,
 							})} RETURNING *;`
-						Value.Assert(itemSelectObj, sel);
+						Value.Assert(itemSelectTObj, sel);
 						return sel;
 					} catch (e) {
 						throw new ServiceError('Failed to create new option selection.', e)

@@ -1,16 +1,16 @@
 import { Static, t } from 'elysia'
-import { uuidObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/uuid'
 
-export const menuObj = t.Object({
-	id: uuidObj,
+export const menuTObj = t.Object({
+	id: uuidTObj,
 	created_at: t.Date(),
-	created_by: uuidObj,
+	created_by: uuidTObj,
 	name: t.String(),
 })
-export type Menu = Static<typeof menuObj>
+export type Menu = Static<typeof menuTObj>
 
-export const itemOnMenuObj = t.Object({
+export const itemOnMenuTObj = t.Object({
 	item_id: t.Integer(),
-	menu_id: uuidObj,
+	menu_id: uuidTObj,
 })
-export type ItemOnMenu = Static<typeof itemOnMenuObj>
+export type ItemOnMenu = Static<typeof itemOnMenuTObj>

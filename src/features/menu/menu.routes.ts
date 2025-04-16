@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { menuController } from './menu.controller'
-import { uuidObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/uuid'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.use(menuController({ name: "mc" }))
@@ -24,7 +24,7 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	// Menu specific route
 	.group("/:menuId", {
 		params: t.Object({
-			menuId: uuidObj
+			menuId: uuidTObj
 		})
 	}, app => app
 			// 1.3 - Get menu details

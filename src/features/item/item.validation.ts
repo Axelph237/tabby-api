@@ -1,44 +1,44 @@
 import { Static, t } from 'elysia'
-import { uuidObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/uuid'
 
-export const itemObj = t.Object({
+export const itemTObj = t.Object({
 	id: t.Integer(),
 	created_at: t.Date(),
-	created_by: uuidObj,
+	created_by: uuidTObj,
 	name: t.String(),
 	description: t.Nullable(t.String()),
 	img_url: t.Nullable(t.String({ format: 'uri' })),
 	base_price: t.Integer(),
 })
-export type Item = Static<typeof itemObj>
+export type Item = Static<typeof itemTObj>
 
 export enum ItemOptionTypes {
 	One = 'one',
 	Many = 'many',
 	Text = 'text',
 }
-export const itemOptionObj = t.Object({
+export const itemOptionTObj = t.Object({
 	id: t.Integer(),
-	created_by: uuidObj,
+	created_by: uuidTObj,
 	label: t.String(),
 	type: t.Union([t.Literal('one'), t.Literal('many'), t.Literal('text')]),
 	item_id: t.Integer(),
 })
-export type ItemOption = Static<typeof itemOptionObj>
+export type ItemOption = Static<typeof itemOptionTObj>
 
-export const itemSelectObj = t.Object({
+export const itemSelectTObj = t.Object({
 	id: t.Integer(),
-	created_by: uuidObj,
+	created_by: uuidTObj,
 	label: t.String(),
 	price: t.Integer(),
 	is_default: t.Boolean(),
 	item_id: t.Integer(),
 	parent_option: t.Nullable(t.Integer())
 })
-export type ItemSelection = Static<typeof itemSelectObj>
+export type ItemSelection = Static<typeof itemSelectTObj>
 
 // ---- FUNCTION OBJECTS
-export const itemDetailsObj = t.Object({
+export const itemDetailsTObj = t.Object({
 	id: t.Integer(),
 	name: t.String(),
 	description: t.Nullable(t.String()),
@@ -60,4 +60,4 @@ export const itemDetailsObj = t.Object({
 		)
 	),
 });
-export type ItemDetails = Static<typeof itemDetailsObj>;
+export type ItemDetails = Static<typeof itemDetailsTObj>;

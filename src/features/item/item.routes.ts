@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { messageResponseObj } from '@utils/types/messageResponse'
 import { itemController } from './item.controller'
-import { itemDetailsObj, itemObj, itemSelectObj, itemOptionObj } from '@features/item/item.validation'
+import { itemDetailsObj, itemTObj, itemSelectTObj, itemOptionTObj } from '@features/item/item.validation'
 
 const ignoredKeys = [ "id", "created_at", "created_by" ];
 
@@ -25,7 +25,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 		// @ts-ignore
 		return await ic.createItem(body);
 	}, {
-		body: t.Omit(itemObj, ignoredKeys),
+		body: t.Omit(itemTObj, ignoredKeys),
 		response: t.Object({
 			item_id: t.Integer()
 		})
@@ -50,8 +50,8 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 		.put("/", async ({ params, body, ic }) => {
 			return await ic.updateItem(params.itemId, body);
 		}, {
-			body: t.Partial(t.Omit(itemObj, ignoredKeys)),
-			response: itemObj
+			body: t.Partial(t.Omit(itemTObj, ignoredKeys)),
+			response: itemTObj
 		})
 		// OPTIONS
 		// 2.5 - Create option
@@ -59,8 +59,8 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 			// @ts-ignore
 			return await ic.createOption(params.itemId, body);
 		},{
-			body: t.Omit(itemOptionObj, [...ignoredKeys, "item_id"]),
-			response: itemOptionObj
+			body: t.Omit(itemOptionTObj, [...ignoredKeys, "item_id"]),
+			response: itemOptionTObj
 		})
 		// 2.6 - Remove options
 		.delete("/options", async ({body, ic }) => {
@@ -79,8 +79,8 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 			params: t.Object({
 				optionId: t.Integer()
 			}),
-			body: t.Partial(t.Omit(itemOptionObj, [...ignoredKeys, "item_id"])),
-			response: itemOptionObj
+			body: t.Partial(t.Omit(itemOptionTObj, [...ignoredKeys, "item_id"])),
+			response: itemOptionTObj
 		})
 		// SELECTIONS
 		// 2.8 - Create selection
@@ -93,7 +93,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 				price: t.Integer(),
 				is_default: t.Boolean()
 			}),
-			response: itemSelectObj
+			response: itemSelectTObj
 		})
 		// 2.9 - Delete selections
 		.delete("/selections", async ({  body, ic }) => {
@@ -112,7 +112,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 			params: t.Object({
 				selId: t.Integer()
 			}),
-			body: t.Partial(t.Omit(itemSelectObj, ignoredKeys)),
-			response: itemSelectObj
+			body: t.Partial(t.Omit(itemSelectTObj, ignoredKeys)),
+			response: itemSelectTObj
 		})
 	)

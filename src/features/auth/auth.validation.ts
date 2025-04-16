@@ -1,8 +1,8 @@
 import {Static, t} from "elysia"
-import { uuidObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/uuid'
 
-export const userObj = t.Object({
-	id: uuidObj,
+export const userTObj = t.Object({
+	id: uuidTObj,
 	name: t.String(),
 	email: t.String(),
 	email_verified: t.Boolean(),
@@ -10,11 +10,11 @@ export const userObj = t.Object({
 	created_at: t.Date(),
 	updated_at: t.Date()
 });
-export type User = Static<typeof userObj>;
+export type User = Static<typeof userTObj>;
 
-export const accountObj = t.Object({
-	id: uuidObj,
-	user_id: uuidObj,
+export const accountTObj = t.Object({
+	id: uuidTObj,
+	user_id: uuidTObj,
 	provider_id: t.String(),
 	access_token: t.Nullable(t.String()),
 	refresh_token: t.Nullable(t.String()),
@@ -25,4 +25,4 @@ export const accountObj = t.Object({
 	created_at: t.Date(),
 	updated_at: t.Date()
 });
-export type Account = Static<typeof accountObj>;
+export type Account = Static<typeof accountTObj>;

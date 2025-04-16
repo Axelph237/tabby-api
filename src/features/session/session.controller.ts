@@ -3,7 +3,7 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
 import { UUID } from '@utils/types/uuid'
-import { SessionDetails, sessionDetailsObj } from './session.validation'
+import { SessionDetails, sessionDetailsTObj } from './session.validation'
 import { sql } from 'bun'
 
 interface ControllerConfig {
@@ -64,7 +64,7 @@ export const sessionController = (init?: ControllerConfig) => new Elysia({
 					try {
 						const [result] = await sql`
 							SELECT * FROM public.get_session_details(${sessionId});`;
-						Value.Assert(sessionDetailsObj, result);
+						Value.Assert(sessionDetailsTObj, result);
 						return result;
 					}
 					catch (e) {

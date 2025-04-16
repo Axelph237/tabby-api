@@ -1,8 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
-import { uuidObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/uuid'
 import { sessionController } from '@features/session/session.controller'
-import { sessionDetailsObj } from '@features/session/session.validation'
+import { sessionDetailsTObj } from '@features/session/session.validation'
 
 export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.use(sessionController({
@@ -16,19 +16,19 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	}, {
 		isAuthenticated: true,
 		body: t.Object({
-			menu_id: uuidObj,
-			session_admins: t.Array(uuidObj),
+			menu_id: uuidTObj,
+			session_admins: t.Array(uuidTObj),
 			expires_at: t.Optional(t.Date())
 		}),
 		response: t.Object({
-			session_id: uuidObj
+			session_id: uuidTObj
 		})
 	})
 	.group(
 		"/:sessId",
 		{
 			params: t.Object({
-				sessId: uuidObj
+				sessId: uuidTObj
 			})
 		},
 		app => app
@@ -42,7 +42,7 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 			.get("/", ({ params, sc }) => {
 				return sc.getSessionDetails(params.sessId);
 			}, {
-				response: sessionDetailsObj
+				response: sessionDetailsTObj
 			})
 	)
 

@@ -1,8 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { orderController } from './order.controller'
-import { uuidObj } from '@utils/types/uuid'
-import { orderLineItem } from '@features/order/order.validation'
+import { uuidTObj } from '@utils/types/uuid'
+import { orderLineItemTObj } from '@features/order/order.validation'
 
 export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 	.use(orderController({
@@ -11,7 +11,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 	.use(authMiddleware)
 	.guard({
 		params: t.Object({
-			sessId: uuidObj
+			sessId: uuidTObj
 		})
 	})
 	// 3.2 - Add an order to a session
@@ -22,7 +22,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 		body: t.Object({
 			guest_name: t.String(),
 			placed_at: t.Date(),
-			items: t.Array(t.Omit(orderLineItem, ["id", "order_id", "unit_price"]))
+			items: t.Array(t.Omit(orderLineItemTObj, ["id", "order_id", "unit_price"]))
 		})
 	})
 	// 3.1 & 3.2 are authenticated routes
