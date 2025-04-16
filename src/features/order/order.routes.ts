@@ -16,6 +16,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 	})
 	// 3.2 - Add an order to a session
 	.post("/", ({ params, body, oc }) => {
+		console.log(body)
 		return oc.createOrder(body.guest_name, params.sessId, body.placed_at, body.items);
 	}, {
 		body: t.Object({

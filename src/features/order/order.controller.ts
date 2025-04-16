@@ -63,12 +63,19 @@ export const orderController = (init?: ControllerConfig) => new Elysia({
 								INSERT INTO public.orders (guest_name, session_id, placed_at, status)
 								VALUES (${guest}, ${sessionId}, ${placedAt}, 'placed')
 								RETURNING id, order_num;`;
+							console.log("Inserting line items")
 							// Insert items
 							await tx`
 								INSERT INTO public.order_line_items ${sql(
-									items.map(v => ({...v, id: order.id}))
+                                        items.map(v => ({
+                                            item_id: v.item_id,
+                                            count: v.count,
+                                            selections: v.selections.length != 0 ? v.selections : null,
+                                            order_id: order.id
+                                        }))
 								)};`;
 
+							console.log("Done inserting items")
 							return order.order_num;
 						});
 					}

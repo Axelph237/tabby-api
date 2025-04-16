@@ -307,11 +307,11 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION public.set_unit_price()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.unit_price := (
+  NEW.unit_price := COALESCE((
     SELECT SUM(COALESCE(price, 0))
-    FROM item_selections AS ios
+    FROM public.item_selections AS ios
     WHERE ios.id = ANY (NEW.selections)
-  );
+  ), 0);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

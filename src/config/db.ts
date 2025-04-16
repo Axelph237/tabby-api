@@ -14,4 +14,4 @@ interface DBConfig {
 export const db = async (init?: DBConfig) => new Elysia({
 	name: init?.name ?? "db",
 })
-	.decorate('pool', new SQL())
+	.decorate('db', new SQL())
