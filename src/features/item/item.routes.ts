@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { messageResponseObj } from '@utils/types/messageResponse'
 import { itemController } from './item.controller'
-import { itemDetailsObj, itemTObj, itemSelectTObj, itemOptionTObj } from '@features/item/item.validation'
+import { itemDetailsTObj, itemTObj, itemSelectTObj, itemOptionTObj } from '@features/item/item.validation'
 
 const ignoredKeys = [ "id", "created_at", "created_by" ];
 
@@ -18,7 +18,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 	.get("/", async ({ ic }) => {
 		return await ic.getItems();
 	}, {
-		response: t.Array(itemDetailsObj)
+		response: t.Array(itemDetailsTObj)
 	})
 	// 2.2 - Create new item
 	.post("/", async ({ body, ic }) => {

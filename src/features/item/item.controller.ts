@@ -6,7 +6,7 @@ import { sql } from 'bun'
 import {
 	Item,
 	ItemDetails,
-	itemDetailsObj,
+	itemDetailsTObj,
 	itemTObj,
 	ItemOption,
 	itemOptionTObj,
@@ -35,7 +35,7 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 						// Function abstracted for better management
 						const result = await sql`
 							SELECT * FROM public.get_user_items(${userId});`;
-						Value.Assert(t.Array(itemDetailsObj), result)
+						Value.Assert(t.Array(itemDetailsTObj), result)
 
 						return result
 					} catch (e) {
