@@ -246,14 +246,45 @@ BEGIN
                 m.id AS menu_id,
                 s.id AS session_id,
                 m.name AS menu_name,
+                m.created_by AS owner,
                 s.expires_at
             FROM public.sessions AS s
             JOIN public.menus AS m ON s.menu_id = m.id
             WHERE s.id = p_session_id
+            LIMIT 1
         ), items_on_menu AS (
             SELECT *
             FROM public.items_to_menus AS itm
             WHERE itm.menu_id = (SELECT menu_id FROM session_menu)
+        ), iom_opts AS (
+            SELECT item_options.item_id, item_options.id, item_options.label, item_options.type
+            FROM public.item_options
+            JOIN items_on_menu AS iom ON iom.item_id = item_options.item_id
+        ), select_objs AS (
+            SELECT COALESCE(item_selections.parent_option, 0) as parent_option,
+                   item_selections.item_id as parent_item,
+                   COALESCE(jsonb_agg(
+                                    jsonb_build_object(
+                                            'label', label,
+                                            'price', COALESCE(price, 0),
+                                            'is_default', COALESCE(is_default, FALSE)
+                                    )
+                            ), '[]'::jsonb) AS selections
+            FROM public.item_selections
+            WHERE item_selections.created_by = (SELECT owner FROM session_menu)
+            GROUP BY parent_option, item_id
+        ), option_objs AS (
+            SELECT select_objs.parent_item, COALESCE(jsonb_agg(
+                jsonb_build_object(
+                    'label', COALESCE(iom_opts.label, '_root'),
+                    'type', COALESCE(iom_opts.type, 'many'),
+                    'selections', select_objs.selections
+                )
+            ), '[]'::jsonb) AS options
+            FROM select_objs
+            -- OUTER JOIN ON PARENT_OPTION FOR ROOT COALESCING
+            FULL OUTER JOIN iom_opts ON select_objs.parent_option = iom_opts.id
+            GROUP BY select_objs.parent_item
         )
         SELECT
             sm.menu_name,
@@ -264,11 +295,13 @@ BEGIN
                         'name', i.name,
                         'description', i.description,
                         'img_url', i.img_url,
-                        'base_price', i.base_price
+                        'base_price', i.base_price,
+                        'options', COALESCE(oo.options, '[]'::jsonb)
                 )), '[]'::jsonb)
                 FROM public.items AS i
                 JOIN items_on_menu AS iom ON iom.item_id = i.id
-            ) as options
+                JOIN option_objs AS oo ON oo.parent_item = i.id
+            ) as items
         FROM session_menu AS sm;
 END;
 $$;
