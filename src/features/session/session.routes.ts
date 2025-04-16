@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidObj } from '@utils/types/uuid'
 import { sessionController } from '@features/session/session.controller'
+import { sessionDetailsObj } from '@features/session/session.validation'
 
 export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.use(sessionController({
@@ -40,6 +41,8 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 			// 4.3 - Get session public details
 			.get("/", ({ params, sc }) => {
 				return sc.getSessionDetails(params.sessId);
+			}, {
+				response: sessionDetailsObj
 			})
 	)
 
