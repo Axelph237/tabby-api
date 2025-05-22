@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { menuController } from './menu.controller'
 import { uuidTObj } from '@utils/types/uuid'
+import { menuTObj } from '@features/menu/menu.validation'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.use(menuController({ name: "mc" }))
@@ -17,9 +18,7 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.post("/", async ({ mc, body }) => {
 		return await mc.createMenu(body.name);
 	}, {
-		body: t.Object({
-			name: t.String()
-		})
+		body: t.Omit(menuTObj, ["id", "created_at", "created_by"])
 	})
 	// Menu specific route
 	.group("/:menuId", {

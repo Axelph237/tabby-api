@@ -300,7 +300,7 @@ BEGIN
                 )), '[]'::jsonb)
                 FROM public.items AS i
                 JOIN items_on_menu AS iom ON iom.item_id = i.id
-                JOIN option_objs AS oo ON oo.parent_item = i.id
+                FULL OUTER JOIN option_objs AS oo ON oo.parent_item = i.id
             ) as items
         FROM session_menu AS sm;
 END;
@@ -447,6 +447,8 @@ CREATE TABLE public.menus (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     created_by uuid DEFAULT gen_random_uuid(),
     name text NOT NULL,
+    backgroundImg text,
+    logoImg text,
     PRIMARY KEY (id)
 );
 ALTER TABLE public.menus OWNER TO neondb_owner;
