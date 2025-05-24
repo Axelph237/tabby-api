@@ -449,6 +449,7 @@ CREATE TABLE public.menus (
     name text NOT NULL,
     backgroundImg text,
     logoImg text,
+    style jsonb,
     PRIMARY KEY (id)
 );
 ALTER TABLE public.menus OWNER TO neondb_owner;
