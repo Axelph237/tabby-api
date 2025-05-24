@@ -447,8 +447,6 @@ CREATE TABLE public.menus (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     created_by uuid DEFAULT gen_random_uuid(),
     name text NOT NULL,
-    backgroundImg text,
-    logoImg text,
     style jsonb,
     PRIMARY KEY (id)
 );
