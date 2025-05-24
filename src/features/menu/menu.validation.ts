@@ -9,7 +9,7 @@ export const menuTObj = t.Object({
 	backgroundImg: t.Optional(t.String({ format: "uri" })),
 	logoImg: t.Optional(t.String({ format: "uri" })),
 	style: t.Optional(t.Object({
-		colors: t.String()
+		colors: t.Optional(t.String())
 	}))
 })
 export type Menu = Static<typeof menuTObj>
