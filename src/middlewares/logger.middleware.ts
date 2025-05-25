@@ -1,6 +1,6 @@
 import logixlysia from 'logixlysia'
 
-export const logger = logixlysia({
+export const loggerMiddleware = logixlysia({
 	config: {
 		showStartupMessage: true,
 		startupMessageFormat: 'simple',

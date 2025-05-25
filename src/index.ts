@@ -6,7 +6,7 @@ import { menuRoutes } from '@features/menu/menu.routes'
 import { sessionRoutes } from '@features/session/session.routes'
 import { userRoutes } from '@features/user/user.routes'
 import { authRoutes } from '@features/auth/auth.routes'
-import { logger } from '@middlewares/logger'
+import { loggerMiddleware } from '@middlewares/logger.middleware'
 import { corsPlugin } from '@config/cors'
 // import { auth } from '@middlewares/auth'
 
@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000
 
 const app = new Elysia()
 	.use(corsPlugin)
-	.use(logger)
+	.use(loggerMiddleware)
 	.error({
 		SERVICE: ServiceError
 	})
