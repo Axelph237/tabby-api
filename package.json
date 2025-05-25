@@ -11,6 +11,7 @@
 		"@elysiajs/jwt": "^1.2.0",
 		"arctic": "^3.6.0",
 		"bun": "^1.2.7",
+		"drizzle-orm": "^0.43.1",
 		"elysia": "latest",
 		"elysia-oauth2": "^2.0.0",
 		"logixlysia": "^4.1.2",
