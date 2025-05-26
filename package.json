@@ -4,7 +4,9 @@
 	"scripts": {
 		"test": "bun --env-file=./src/__tests__/test.env test --preload __tests__/test.setup.ts",
 		"dev": "bun run --watch src/index.ts",
-		"build": "bun build ./src/index.ts --target=bun"
+		"build": "bun build ./src/index.ts --target=bun",
+		"schema:push": "npx drizzle-kit push",
+		"schema:migrate": "npx drizzle-kit generate && npx drizzle-kit migrate"
 	},
 	"dependencies": {
 		"@elysiajs/cors": "^1.2.0",
