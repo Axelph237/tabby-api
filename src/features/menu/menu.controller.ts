@@ -5,6 +5,8 @@ import { ServiceError } from '@utils/types/serviceError'
 import { UUID } from '@utils/types/uuid'
 import { Menu, menuTObj } from './menu.validation'
 import { sql } from 'bun'
+import * as publicSchema from '@config/drizzle/schemas/public'
+import { drizzle } from 'drizzle-orm/bun-sql'
 
 interface ControllerConfig {
 	name?: string
@@ -128,4 +130,35 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 			}
 		}
 	})
-	.as("plugin")
+	.as("global")
+
+function index() {
+	// Get all menus
+}
+
+function get(id: UUID) {
+	// Get specific menu
+	// return db.query.men
+	// try {
+	// 	const [menu] = await sql`
+	// 						SELECT *
+	// 						FROM public.menus
+	// 						WHERE id = ${menuId} AND created_by = ${userId};`;
+	// 	Value.Assert(menuTObj, menu);
+	// 	return menu;
+	// } catch (e) {
+	// 	throw new ServiceError('Failed to get menu', e);
+	// }
+}
+
+function create() {
+	// Create menu
+}
+
+function update() {
+	// Update menu
+}
+
+function remove() {
+	// Delete menu
+}

@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
+import { UUID } from '@utils/types/uuid'
 
 interface ControllerConfig {
 	name?: string
@@ -20,4 +21,4 @@ export const userController = (init?: ControllerConfig) => new Elysia({
 			}
 		}
 	})
-	.as("plugin")
+	.as("global")

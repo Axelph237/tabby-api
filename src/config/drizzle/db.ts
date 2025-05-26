@@ -5,3 +5,5 @@ const db = drizzle({
 	connection: process.env.TLS_POSTGRES_DATABASE_URL!,
 	casing: "snake_case"
 });
+
+export default db;
