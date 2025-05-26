@@ -1,11 +1,12 @@
 import { text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
 import { timestamps } from '@config/drizzle/types/timestamps'
 import AuthSchema from '@config/drizzle/schemas/auth'
-import { users } from '@config/drizzle/tables/users.model'
+import { usersTable } from '@config/drizzle/tables/users.model'
+import { relations } from 'drizzle-orm'
 
 export const accountsTable = AuthSchema.table("accounts", {
 	id: uuid().primaryKey().defaultRandom(),
-	userId: uuid().notNull().references(() => users.id),
+	userId: uuid().notNull().references(() => usersTable.id),
 	providerId: text().notNull(),
 	accessToken: text(),
 	tokenType: text(),
@@ -18,3 +19,10 @@ export const accountsTable = AuthSchema.table("accounts", {
 }, t => [
 	unique().on(t.userId, t.providerId)
 ])
+
+export const accountsRelations = relations(accountsTable, ({ one }) => ({
+	user: one(usersTable, {
+		fields: [accountsTable.userId],
+		references: [usersTable.id],
+	})
+}))
