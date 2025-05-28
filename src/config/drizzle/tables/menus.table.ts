@@ -3,8 +3,8 @@ import { timestamps } from '@config/drizzle/types/timestamps'
 import PublicSchema from '@config/drizzle/schemas/public'
 import { user } from '@config/drizzle/types/user'
 import { relations } from 'drizzle-orm'
-import { itemsToMenusJTable } from '@config/drizzle/tables/items.model'
-import { sessionsTable } from '@config/drizzle/tables/sessions.model'
+import { itemsToMenusJTable } from '@config/drizzle/tables/items.table'
+import { sessionsTable } from '@config/drizzle/tables/sessions.table'
 
 export const menusTable = PublicSchema.table("menus", {
 	id: uuid().primaryKey().defaultRandom(),

@@ -1,9 +1,9 @@
 import { integer, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import PublicSchema from '@config/drizzle/schemas/public'
 import { relations } from 'drizzle-orm'
-import { sessionsTable } from '@config/drizzle/tables/sessions.model'
-import { itemsTable } from '@config/drizzle/tables/items.model'
-import { usersTable } from '@config/drizzle/tables/users.model'
+import { sessionsTable } from '@config/drizzle/tables/sessions.table'
+import { itemsTable } from '@config/drizzle/tables/items.table'
+import { usersTable } from '@config/drizzle/tables/users.table'
 
 export const ordersTable = PublicSchema.table("orders", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),

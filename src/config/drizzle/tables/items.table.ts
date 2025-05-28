@@ -1,11 +1,11 @@
 import { boolean, index, integer, primaryKey, text, unique, uuid } from 'drizzle-orm/pg-core'
 import { timestamps } from '@config/drizzle/types/timestamps'
 import PublicSchema from '@config/drizzle/schemas/public'
-import { menusTable } from '@config/drizzle/tables/menus.model'
+import { menusTable } from '@config/drizzle/tables/menus.table'
 import { user } from '@config/drizzle/types/user'
 import { relations } from 'drizzle-orm'
-import { usersTable } from '@config/drizzle/tables/users.model'
-import { ordersTable } from '@config/drizzle/tables/orders.model'
+import { usersTable } from '@config/drizzle/tables/users.table'
+import { ordersTable } from '@config/drizzle/tables/orders.table'
 
 export const itemsTable = PublicSchema.table("items",{
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
