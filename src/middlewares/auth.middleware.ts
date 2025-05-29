@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 // import jwt, { JWTOption } from '@elysiajs/jwt'
-import { UUID } from '@utils/types/uuid'
+import { UUID } from '@utils/types/typebox/uuid'
 import { jwtPlugin } from '@config/jwt'
 
 // const jwtConfig: JWTOption = {

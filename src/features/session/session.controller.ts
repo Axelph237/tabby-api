@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
-import { UUID } from '@utils/types/uuid'
+import { UUID } from '@utils/types/typebox/uuid'
 import { SessionDetails, sessionDetailsTObj } from './session.validation'
 import { sql } from 'bun'
 

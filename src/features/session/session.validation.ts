@@ -1,6 +1,6 @@
 import { Static, t } from 'elysia'
 import { itemTObj, itemOptionTObj, itemSelectTObj } from '../item/item.validation'
-import { uuidTObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/typebox/uuid'
 
 export const sessionTObj = t.Object({
 	id: uuidTObj,

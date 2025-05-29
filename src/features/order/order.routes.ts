@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { orderController } from './order.controller'
-import { uuidTObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/typebox/uuid'
 import { orderLineItemTObj } from '@features/order/order.validation'
 
 export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })

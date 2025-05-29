@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { randomUUIDv7, sql } from 'bun'
-import { UUID } from '@utils/types/uuid'
+import { UUID } from '@utils/types/typebox/uuid'
 import { ServiceError } from '@utils/types/serviceError'
 import { User } from '@features/auth/auth.validation'
 import { ParsedOAuth2Tokens } from '@utils/parseOAuthTokens'

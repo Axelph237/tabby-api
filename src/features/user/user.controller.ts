@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
-import { UUID } from '@utils/types/uuid'
+import { UUID } from '@utils/types/typebox/uuid'
 
 interface ControllerConfig {
 	name?: string

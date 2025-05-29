@@ -2,11 +2,13 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
-import { UUID } from '@utils/types/uuid'
-import { Menu, menuTObj } from './menu.validation'
-import { sql } from 'bun'
-import * as publicSchema from '@config/drizzle/schemas/public'
-import { drizzle } from 'drizzle-orm/bun-sql'
+import { UUID } from '@utils/types/typebox/uuid'
+import { menuTObj } from './menu.validation'
+import db, { _projSelect, Projection } from '@config/drizzle/db'
+import { eq, sql } from 'drizzle-orm'
+import { menusTable } from '@config/drizzle/tables/menus.table'
+import { Menu, NewMenu } from '@features/menu/menu.model'
+import { itemsTable, itemsToMenusJTable } from '@config/drizzle/tables/items.table'
 
 interface ControllerConfig {
 	name?: string
@@ -132,33 +134,36 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 	})
 	.as("global")
 
-function index() {
-	// Get all menus
+type MenuProjection = Projection<typeof menusTable>
+
+function index(projection?: MenuProjection) {
+	return _projSelect(projection).from(menusTable).$dynamic();
 }
 
-function get(id: UUID) {
-	// Get specific menu
-	// return db.query.men
-	// try {
-	// 	const [menu] = await sql`
-	// 						SELECT *
-	// 						FROM public.menus
-	// 						WHERE id = ${menuId} AND created_by = ${userId};`;
-	// 	Value.Assert(menuTObj, menu);
-	// 	return menu;
-	// } catch (e) {
-	// 	throw new ServiceError('Failed to get menu', e);
-	// }
+function get(id: UUID, projection?: MenuProjection) {
+	return _projSelect(projection).from(menusTable).where(eq(menusTable.id, id)).$dynamic();
 }
 
-function create() {
-	// Create menu
+function create(menu: NewMenu, ) {
+	return db.insert(menusTable).values(menu).returning().$dynamic();
 }
 
-function update() {
-	// Update menu
+function update(menu: Partial<Menu> & Pick<Menu, "id">) {
+	return db.update(menusTable).set(menu).where(eq(menusTable.id, menu.id)).$dynamic();
 }
 
-function remove() {
-	// Delete menu
+function remove(menuId: UUID) {
+	return db.delete(menusTable).where(eq(menusTable.id, menuId)).$dynamic();
 }
+
+function $addItemToMenu(itemId: number, menuId: UUID) {
+	const validItem = db.$with('valid_item').as(
+		db.select().from(itemsTable).where(eq(itemsTable.ownerId, ))
+	)
+}
+
+function $removeItemFromMenu() {
+
+}
+
+export default { index, get, create, update, remove, $addItemToMenu, $removeItemFromMenu };

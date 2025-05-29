@@ -2,7 +2,7 @@ import { Elysia } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { ServiceError } from '@utils/types/serviceError'
 import { sql } from 'bun'
-import { UUID } from '@utils/types/uuid'
+import { UUID } from '@utils/types/typebox/uuid'
 import { Order, OrderLineItem } from './order.validation'
 
 interface ControllerConfig {

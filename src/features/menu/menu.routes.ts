@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { menuController } from './menu.controller'
-import { uuidTObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/typebox/uuid'
 import { menuTObj } from '@features/menu/menu.validation'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })

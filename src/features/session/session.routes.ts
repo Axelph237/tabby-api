@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
-import { uuidTObj } from '@utils/types/uuid'
+import { uuidTObj } from '@utils/types/typebox/uuid'
 import { sessionController } from '@features/session/session.controller'
 import { sessionDetailsTObj } from '@features/session/session.validation'
 
