@@ -13,7 +13,7 @@ const db = drizzle({
 export default db;
 
 // Db types
-type TableDetails = Table<TableConfig<Column<any, object, object>>>
+export type TableDetails = Table<TableConfig<Column<any, object, object>>>
 export type Projection<TTable extends TableDetails = any> = SelectedFields<any, TTable>;
 
 // Special db functions
