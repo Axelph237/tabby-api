@@ -1,42 +1,43 @@
 import Repository from '@utils/types/repository'
-import { itemSelectionsTable, itemsTable } from '@config/drizzle/tables/items.table'
-import db, { _asUser, _projSelect, Projection } from '@config/drizzle/db'
-import { eq, KnownKeysOnly, sql, SQLWrapper } from 'drizzle-orm'
+import { itemsTable } from '@config/drizzle/tables/items.table'
+import db, { _projSelect, Projection } from '@config/drizzle/db'
+import { eq, sql, SQL } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
+import ItemOptionRepository from '@features/item/itemOption.repository'
 
 type ItemProjection = Projection<typeof itemsTable>;
-
 export type Item = typeof itemsTable.$inferSelect;
-
 export type NewItem = typeof itemsTable.$inferInsert;
-
 export const tItem = createSelectSchema(itemsTable);
-
 export const tNewItem = createInsertSchema(itemsTable);
 
 class ItemRepository extends Repository<typeof itemsTable> {
+	$options: ItemOptionRepository;
 
-	 itemsQuery(opts?: { limit?: number }) {
-		 const query = db.query.itemsTable.findMany({
-			 with: {
-				 options: {
-					 with: {
-						 selections: true
-					 }
-				 }
-			 },
-			 ...opts
-		 	}).toSQL();
+	constructor() {
+		super();
+		this.$options = new ItemOptionRepository();
+	}
 
-		 return sql.raw(query.sql);
-	 }
+	static #objsView = sql.raw(
+		db.query.itemsTable.findMany({
+			with: {
+				options: {
+					with: {
+						selections: true
+					}
+				}
+			}
+		}).toSQL().sql
+	)
 
 	index(projection?: ItemProjection) {
-		return _projSelect(projection).from(this.itemsQuery()).$dynamic();
+		return _projSelect(projection).from(ItemRepository.#objsView).$dynamic();
 	}
 
 	get(id: number, projection?: ItemProjection) {
-		return _projSelect(projection).from(this.itemsQuery({ limit: 1 })).$dynamic();
+		 return _projSelect(projection).from(ItemRepository.#objsView)
+			 .limit(1).where(eq(itemsTable.id, id)).$dynamic();
 	}
 
 	create(item: NewItem) {
