@@ -237,4 +237,4 @@ export const itemController = (init?: ControllerConfig) => new Elysia({
 			}
 		}
 	})
-	.as("plugin")
+	.as("global")

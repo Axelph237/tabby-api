@@ -7,11 +7,8 @@ import { itemsToMenusJTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 
 export type Menu = typeof menusTable.$inferSelect
-
 export type NewMenu = typeof menusTable.$inferInsert
-
 export const tMenu = createSelectSchema(menusTable);
-
 export const tNewMenu = createInsertSchema(menusTable);
 
 type MenuProjection = Projection<typeof menusTable>;
