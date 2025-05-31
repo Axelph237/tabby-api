@@ -1,12 +1,11 @@
-import { primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core'
-import PublicSchema from '@config/drizzle/schemas/public'
+import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { menusTable } from '@config/drizzle/tables/menus.table'
 import { user } from '@config/drizzle/types/user'
 import { relations } from 'drizzle-orm'
 import { usersTable } from '@config/drizzle/tables/users.table'
 import { ordersTable } from '@config/drizzle/tables/orders.table'
 
-export const sessionsTable = PublicSchema.table("sessions", {
+export const sessionsTable = pgTable("sessions", {
 	id: uuid().primaryKey().defaultRandom(),
 	menuId: uuid().notNull().references(() => menusTable.id),
 	expiresAt: timestamp(),
@@ -21,7 +20,7 @@ export const sessionsRelations = relations(sessionsTable, ({ one, many }) => ({
 	orders: many(ordersTable)
 }))
 
-export const sessionAdminsTable = PublicSchema.table("session_admins", {
+export const sessionAdminsTable = pgTable("session_admins", {
 	sessionId: uuid().notNull().references(() => sessionsTable.id),
 	userId: user().notNull()
 }, t => [

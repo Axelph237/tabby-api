@@ -1,11 +1,9 @@
-import { integer, text, timestamp, uuid } from 'drizzle-orm/pg-core'
-import PublicSchema from '@config/drizzle/schemas/public'
+import { integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { sessionsTable } from '@config/drizzle/tables/sessions.table'
 import { itemsTable } from '@config/drizzle/tables/items.table'
-import { usersTable } from '@config/drizzle/tables/users.table'
 
-export const ordersTable = PublicSchema.table("orders", {
+export const ordersTable = pgTable("orders", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	placedAt: timestamp().notNull(),
 	sessionId: uuid().notNull().references(() => sessionsTable.id),
@@ -23,7 +21,7 @@ export const ordersRelations = relations(ordersTable, ({ one, many }) => ({
 	})
 }))
 
-export const orderLineItemsTable = PublicSchema.table("order_line_items", {
+export const orderLineItemsTable = pgTable("order_line_items", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	itemId: integer().notNull().references(() => itemsTable.id),
 	orderId: integer().notNull().references(() => ordersTable.id),

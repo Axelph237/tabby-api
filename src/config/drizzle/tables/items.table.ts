@@ -1,13 +1,12 @@
-import { boolean, index, integer, primaryKey, text, unique, uuid } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, pgTable, primaryKey, text, unique, uuid } from 'drizzle-orm/pg-core'
 import { timestamps } from '@config/drizzle/types/timestamps'
-import PublicSchema from '@config/drizzle/schemas/public'
 import { menusTable } from '@config/drizzle/tables/menus.table'
 import { user } from '@config/drizzle/types/user'
 import { relations } from 'drizzle-orm'
 import { usersTable } from '@config/drizzle/tables/users.table'
 import { ordersTable } from '@config/drizzle/tables/orders.table'
 
-export const itemsTable = PublicSchema.table("items",{
+export const itemsTable = pgTable("items",{
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	name: text().notNull(),
 	description: text(),
@@ -29,7 +28,7 @@ export const itemsRelations = relations(itemsTable, ({ one, many }) => ({
 	orders: many(ordersTable)
 }))
 
-export const itemsToMenusJTable = PublicSchema.table("items_to_menus", {
+export const itemsToMenusJTable = pgTable("items_to_menus", {
 	itemId: integer().notNull().references(() => itemsTable.id),
 	menuId: uuid().notNull().references(() => menusTable.id)
 }, t => [
@@ -47,7 +46,7 @@ export const itemsToMenusRelations = relations(itemsToMenusJTable,({ one }) => (
 	})
 }))
 
-export const itemOptionsTable = PublicSchema.table("item_options", {
+export const itemOptionsTable = pgTable("item_options", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	label: text().notNull(),
 	type: text().notNull(),
@@ -58,7 +57,7 @@ export const itemOptionsTable = PublicSchema.table("item_options", {
 	index("item_options_created_by_hash").using("hash", t.ownerId)
 ])
 
-export const itemOptionsRelations = relations(itemOptionsTable, ({ one }) => ({
+export const itemOptionsRelations = relations(itemOptionsTable, ({ one, many }) => ({
 	parentItem: one(itemsTable, {
 		fields: [itemOptionsTable.parentItemId],
 		references: [itemsTable.id],
@@ -66,10 +65,11 @@ export const itemOptionsRelations = relations(itemOptionsTable, ({ one }) => ({
 	owner: one(usersTable, {
 		fields: [itemOptionsTable.ownerId],
 		references: [usersTable.id],
-	})
+	}),
+	selections: many(itemSelectionsTable)
 }))
 
-export const itemSelectionsTable = PublicSchema.table("item_selections", {
+export const itemSelectionsTable = pgTable("item_selections", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	parentItemId: integer().notNull().references(() => itemsTable.id),
 	parentOptionId: integer().references(() => itemOptionsTable.id),
