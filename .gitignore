@@ -8,6 +8,9 @@
 # ide
 /.idea
 
+# drizzle migrations
+/drizzle/*
+
 # testing
 /coverage
 
