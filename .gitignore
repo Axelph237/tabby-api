@@ -9,7 +9,7 @@
 /.idea
 
 # drizzle migrations
-/drizzle/*
+/drizzle
 
 # testing
 /coverage
