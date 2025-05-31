@@ -13,6 +13,7 @@
 		"@elysiajs/jwt": "^1.2.0",
 		"arctic": "^3.6.0",
 		"bun": "^1.2.7",
+		"dotenv": "^16.5.0",
 		"drizzle-orm": "^0.43.1",
 		"drizzle-typebox": "^0.3.3",
 		"elysia": "latest",
