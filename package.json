@@ -2,7 +2,7 @@
 	"name": "elysia",
 	"version": "1.0.50",
 	"scripts": {
-		"test": "bun --env-file=./src/__tests__/test.env test --preload __tests__/test.setup.ts",
+		"test": "bun test --env-file ./__tests__/test.env --preload __tests__/test.setup.ts",
 		"dev": "bun run --watch src/index.ts",
 		"build": "bun build ./src/index.ts --target=bun",
 		"schema:push": "npx drizzle-kit push",

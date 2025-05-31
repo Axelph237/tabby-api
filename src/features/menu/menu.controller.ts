@@ -4,11 +4,12 @@ import { Value } from '@sinclair/typebox/value'
 import { ServiceError } from '@utils/types/serviceError'
 import { UUID } from '@utils/types/typebox/uuid'
 import { menuTObj } from './menu.validation'
-import db, { _projSelect, Projection } from '@config/drizzle/db'
-import { eq, sql } from 'drizzle-orm'
+import db, { _asUser, _projSelect, Projection } from '@config/drizzle/db'
+import { and, eq, sql } from 'drizzle-orm'
 import { menusTable } from '@config/drizzle/tables/menus.table'
 import { Menu, NewMenu } from '@features/menu/menu.model'
 import { itemsTable, itemsToMenusJTable } from '@config/drizzle/tables/items.table'
+import Repository from '@utils/types/repository'
 
 interface ControllerConfig {
 	name?: string
@@ -133,37 +134,3 @@ export const menuController = (init?: ControllerConfig) => new Elysia({
 		}
 	})
 	.as("global")
-
-type MenuProjection = Projection<typeof menusTable>
-
-function index(projection?: MenuProjection) {
-	return _projSelect(projection).from(menusTable).$dynamic();
-}
-
-function get(id: UUID, projection?: MenuProjection) {
-	return _projSelect(projection).from(menusTable).where(eq(menusTable.id, id)).$dynamic();
-}
-
-function create(menu: NewMenu, ) {
-	return db.insert(menusTable).values(menu).returning().$dynamic();
-}
-
-function update(menu: Partial<Menu> & Pick<Menu, "id">) {
-	return db.update(menusTable).set(menu).where(eq(menusTable.id, menu.id)).$dynamic();
-}
-
-function remove(menuId: UUID) {
-	return db.delete(menusTable).where(eq(menusTable.id, menuId)).$dynamic();
-}
-
-function $addItemToMenu(itemId: number, menuId: UUID) {
-	const validItem = db.$with('valid_item').as(
-		db.select().from(itemsTable).where(eq(itemsTable.ownerId, ))
-	)
-}
-
-function $removeItemFromMenu() {
-
-}
-
-export default { index, get, create, update, remove, $addItemToMenu, $removeItemFromMenu };

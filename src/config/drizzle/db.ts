@@ -1,4 +1,3 @@
-// import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import * as models from "./tables/exports";
 import * as authSchema from "./schemas/auth";
@@ -15,6 +14,7 @@ const db = drizzle({
 	casing: "snake_case",
 	schema: {...models, ...authSchema}
 });
+console.log("drizzle: Connected to db @", process.env.TLS_POSTGRES_DATABASE_URL!);
 export default db;
 
 // Db types

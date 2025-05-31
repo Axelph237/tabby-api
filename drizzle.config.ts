@@ -8,4 +8,5 @@ export default defineConfig({
 	dbCredentials: {
 		url: process.env.TLS_POSTGRES_DATABASE_URL!,
 	},
+	casing: "snake_case",
 });

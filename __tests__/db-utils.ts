@@ -6,7 +6,7 @@ export async function setupTestDatabase() {
 	// Docker container
 	try {
 		child_process.execSync(
-			'docker run --name pg-container --rm -d pg-image'
+			'docker run --name pg-container --rm -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5432:5432 -d pg-image'
 		)
 		console.log('Running new Docker container...')
 	} catch {
@@ -23,7 +23,7 @@ export async function setupTestDatabase() {
 export function cleanupTestDatabase() {
 	console.log('---- [Test Teardown] ----')
 	// Now kill and remove the container
-	child_process.execSync('docker kill pg-container')
+	// child_process.execSync('docker kill pg-container')
 	console.log('Killed Docker container')
 }
 
