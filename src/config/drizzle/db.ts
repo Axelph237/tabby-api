@@ -13,10 +13,12 @@ import { SQL } from 'bun'
 export const client = new SQL({
 	hostname: "localhost",
 	port: 5432,
-	username: "postgres",
+	user: "postgres",
 	password: "postgres",
-	database: "postgres",
-})
+	username: "postgres"
+});
+await client.connect();
+console.log(client.options);
 
 const db = drizzle(client, {
 	casing: "snake_case",
