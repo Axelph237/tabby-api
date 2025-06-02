@@ -8,11 +8,20 @@ import {
 	PgTableWithColumns, PgUpdate,
 } from 'drizzle-orm/pg-core'
 import { UUID } from '@utils/types/typebox/uuid'
+import { SQL } from 'bun'
 
-const db = drizzle({
-	connection: process.env.TLS_POSTGRES_DATABASE_URL!,
+export const client = new SQL({
+	hostname: "localhost",
+	port: 5432,
+	username: "postgres",
+	password: "postgres",
+	database: "postgres",
+})
+
+const db = drizzle(client, {
 	casing: "snake_case",
-	schema: {...models, ...authSchema}
+	schema: {...models, ...authSchema},
+	logger: true
 });
 console.log("drizzle: Connected to db @", process.env.TLS_POSTGRES_DATABASE_URL!);
 export default db;
