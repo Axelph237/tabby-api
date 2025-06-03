@@ -12,10 +12,7 @@ describe("Test Items Repository", () => {
 		const repo = new ItemRepository()
 
 		try {
-			const bunRes = await client`
-				SELECT * FROM items;
-			`
-			console.log("Bun Result:", bunRes);
+			console.log("Bun Result:", await db.execute(sql`SELECT * FROM items`));
 
 			// const result2 = await db.select().from(itemsTable);
 			// console.log("Result 2", result2)

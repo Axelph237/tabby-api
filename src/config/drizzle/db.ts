@@ -10,22 +10,21 @@ import {
 import { UUID } from '@utils/types/typebox/uuid'
 import { SQL } from 'bun'
 
-export const client = new SQL({
-	hostname: "localhost",
-	port: 5432,
-	user: "postgres",
-	password: "postgres",
-	username: "postgres"
+const client = new SQL({
+	url: process.env.TLS_POSTGRES_DATABASE_URL!,
+	onconnect: () => {
+		console.log("sql: client connected");
+	},
+	onclose: () => {
+		console.log("sql: client disconnected");
+	}
 });
-await client.connect();
-console.log(client.options);
 
 const db = drizzle(client, {
 	casing: "snake_case",
 	schema: {...models, ...authSchema},
 	logger: true
 });
-console.log("drizzle: Connected to db @", process.env.TLS_POSTGRES_DATABASE_URL!);
 export default db;
 
 // Db types
