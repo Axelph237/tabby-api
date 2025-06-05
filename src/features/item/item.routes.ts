@@ -1,90 +1,52 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { messageResponseObj } from '@utils/types/typebox/messageResponse'
-import { itemController } from './item.controller'
-import { itemDetailsTObj, itemTObj, itemSelectTObj, itemOptionTObj } from '@features/item/item.validation'
-
-const ignoredKeys = [ "id", "created_at", "created_by" ];
+import ItemRepository, { tNewItem } from '@features/item/item.repository'
+import { tTimeless } from '@utils/types/typebox/timeless'
+import { tNewItemOption } from '@features/item/itemOption.repository'
 
 export const itemRoutes = new Elysia({ prefix: "/items" })
-	.use(itemController({
-		name: "ic"
-	}))
+	.decorate("itemRepo", new ItemRepository())
 	.use(authMiddleware)
-	.guard({
-		isAuthenticated: true
-	})
+	.guard({ isAuthenticated: true })
 	// 2.1 - Get user's items
-	.get("/", async ({ ic }) => {
-		return await ic.getItems();
-	}, {
-		response: t.Array(itemDetailsTObj)
-	})
+	.get("/", async ({ itemRepo }) => itemRepo.index())
 	// 2.2 - Create new item
-	.post("/", async ({ body, ic }) => {
-		// @ts-ignore
-		return await ic.createItem(body);
-	}, {
-		body: t.Omit(itemTObj, ignoredKeys),
-		response: t.Object({
-			item_id: t.Integer()
-		})
-	})
-	// 2.3 - Delete items
-	.delete("/", async ({ body, ic }) => {
-		await ic.deleteItems(body);
-		return {
-			message: "Successfully deleted items."
-		}
-	}, {
-		body: t.Array(t.Integer()),
-		response: messageResponseObj
-	})
+	.post("/", async ({ body, itemRepo }) => itemRepo.create(body),
+		{ body: tTimeless<typeof tNewItem>(tNewItem) })
 	// Item specific routes
-	.group("/:itemId", {
-		params: t.Object({
-			itemId: t.Integer()
+	.group("/:itemId", { params: t.Object({ itemId: t.Integer() }) }, app => app
+		// 2.3 - Delete item
+		.delete("/", async ({ params, itemRepo }) => {
+			await itemRepo.remove(params.itemId);
+			return { message: "Successfully deleted items." }
 		})
-	}, app => app
 		// 2.4 - Update item
-		.put("/", async ({ params, body, ic }) => {
-			return await ic.updateItem(params.itemId, body);
-		}, {
-			body: t.Partial(t.Omit(itemTObj, ignoredKeys)),
-			response: itemTObj
-		})
+		.put("/", async ({ params, body, itemRepo }) => itemRepo.update({ id: params.itemId, ...body }),
+			{ body: t.Partial(tNewItem) })
 		// OPTIONS
 		// 2.5 - Create option
-		.post("/options", async ({ params, body, ic}) => {
-			// @ts-ignore
-			return await ic.createOption(params.itemId, body);
-		},{
-			body: t.Omit(itemOptionTObj, [...ignoredKeys, "item_id"]),
-			response: itemOptionTObj
-		})
-		// 2.6 - Remove options
-		.delete("/options", async ({body, ic }) => {
-			await ic.deleteOptions(body);
-			return {
-				message: "Successfully deleted options from item."
-			}
-		}, {
-			body: t.Array(t.Integer()),
-			response: messageResponseObj
-		})
+		.post("/options", async ({ params, body, itemRepo }) => itemRepo.$options.create({ parentItemId: params.itemId, ...body }),
+			{ body: t.Omit(tTimeless<typeof tNewItemOption>(tNewItemOption), ["parentItemId"]) })
+		// 2.6 - Remove option
+		.delete("/options/:optId", async ({params, itemRepo }) => {
+			await itemRepo.$options.remove(params.optId);
+			return { message: "Successfully deleted options from item." }
+		},
+			{ params: t.Object({ optId: t.Integer() }) })
 		// 2.7 - Update option
-		.put("/options/:optionId", async ({ params, body, ic }) => {
-			return await ic.updateOption(params.optionId, body);
+		.put("/options/:optId", async ({ params, body, itemRepo }) => {
+			return await ic.updateOption(params.optId, body);
 		}, {
 			params: t.Object({
-				optionId: t.Integer()
+				optId: t.Integer()
 			}),
 			body: t.Partial(t.Omit(itemOptionTObj, [...ignoredKeys, "item_id"])),
 			response: itemOptionTObj
 		})
 		// SELECTIONS
 		// 2.8 - Create selection
-		.post("/selections", async ({  params, body, ic }) => {
+		.post("/selections", async ({  params, body, itemRepo }) => {
 			return await ic.createSelection(params.itemId, body);
 		}, {
 			body: t.Object({
@@ -96,7 +58,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 			response: itemSelectTObj
 		})
 		// 2.9 - Delete selections
-		.delete("/selections", async ({  body, ic }) => {
+		.delete("/selections", async ({  body, itemRepo }) => {
 			await ic.deleteSelections(body)
 			return {
 				message: "Successfully deleted selections."
@@ -106,7 +68,7 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 			response: messageResponseObj
 		})
 		// 2.10 - Update selection
-		.put("/selections/:selId", async ({ params, body, ic }) => {
+		.put("/selections/:selId", async ({ params, body, itemRepo }) => {
 			return await ic.updateSelection(params.selId, body);
 		}, {
 			params: t.Object({

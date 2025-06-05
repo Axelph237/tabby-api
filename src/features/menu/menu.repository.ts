@@ -5,6 +5,7 @@ import { UUID } from '@utils/types/typebox/uuid'
 import { and, eq } from 'drizzle-orm'
 import { itemsToMenusJTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
+import { Timeless } from '@utils/types/typebox/timeless'
 
 export type Menu = typeof menusTable.$inferSelect
 export type NewMenu = typeof menusTable.$inferInsert
@@ -22,7 +23,7 @@ class MenuRepository extends Repository<typeof menusTable> {
 		return _projSelect(projection).from(menusTable).where(eq(menusTable.id, id)).$dynamic();
 	}
 
-	create(menu: NewMenu) {
+	create(menu: Timeless<NewMenu>) {
 		return db.insert(menusTable).values(menu).returning().$dynamic();
 	}
 
