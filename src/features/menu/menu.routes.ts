@@ -3,7 +3,7 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidTObj } from '@utils/types/typebox/uuid'
 import MenuRepository, { tMenu, tNewMenu } from '@features/menu/menu.repository'
 import { tTimeless } from '@utils/types/typebox/timeless'
-import { _asUser } from '@config/drizzle/db'
+import { _asUser } from '@config/drizzle/query-wrappers'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.decorate("menuRepo", new MenuRepository())
