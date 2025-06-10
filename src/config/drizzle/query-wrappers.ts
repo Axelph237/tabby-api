@@ -2,17 +2,14 @@ import { sql } from "drizzle-orm";
 import { PgTableWithColumns } from "drizzle-orm/pg-core";
 import { NeonHttpQueryResult } from "drizzle-orm/neon-http";
 import db from "./db";
-import { AnyDrizzleQuery, SelectProjection } from "@utils/types/drizzle/queries";
+import { AnyQuery, AnySimpleQuery, NeonQueryResult, SelectProjection } from "@utils/types/drizzle/queries";
 import { UUID } from "@utils/types/typebox/uuid";
-
-
-type NeonQueryResult = NeonHttpQueryResult<Record<string, unknown>>;
 
 export function _projSelect<P extends PgTableWithColumns<any>>(projection?: SelectProjection<P>) {
 	return (projection ? db.select(projection) : db.select())
 }
 
-export function _asUser(userId: UUID | undefined, query: AnyDrizzleQuery): Promise<NeonQueryResult> {
+export function _asUser(userId: UUID | undefined, query: AnySimpleQuery): Promise<NeonQueryResult> {
 	const BATCH_SIZE = 5;
 	const RELEVANT_QUERY = 2;
 
@@ -35,7 +32,7 @@ export function _asUser(userId: UUID | undefined, query: AnyDrizzleQuery): Promi
 	})
 }
 
-export function _asGuest(query: AnyDrizzleQuery): Promise<NeonQueryResult> {
+export function _asGuest(query: AnySimpleQuery): Promise<NeonQueryResult> {
 	const BATCH_SIZE = 3;
 	const RELEVANT_QUERY = 1;
 
@@ -50,5 +47,29 @@ export function _asGuest(query: AnyDrizzleQuery): Promise<NeonQueryResult> {
 			reject("_asGuest() query wrapper returned unexpected results.")
 
 		resolve(result[RELEVANT_QUERY]);
+	})
+}
+
+export function _asUserTransaction<T = any>(userId: UUID, promise: Promise<T>): Promise<T> {
+	return db.transaction(async (tx) => {
+		await tx.execute(sql`SET ROLE authorized;`);
+		await tx.execute(sql`SELECT set_config('tabby.transaction.current_user', '${sql.raw(userId)}', TRUE)`);
+
+		const result = await promise;
+
+		await tx.execute(sql`SELECT set_config('tabby.transaction.current_user', NULL, TRUE);`);
+		await tx.execute(sql`RESET ROLE;`);
+
+		return result;
+	})
+}
+
+export function _asGuestTransaction<T = any>(promise: Promise<T>): Promise<T> {
+	return db.transaction(async (tx) => {
+		await tx.execute(sql`SET ROLE guest;`);
+		const result = await promise;
+		await tx.execute(sql`RESET ROLE;`);
+
+		return result;
 	})
 }

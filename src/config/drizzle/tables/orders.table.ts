@@ -49,7 +49,8 @@ export const ordersRelations = relations(ordersTable, ({ one, many }) => ({
 	session: one(sessionsTable, {
 		fields: [ordersTable.sessionId],
 		references: [sessionsTable.id]
-	})
+	}),
+	lineItems: many(orderLineItemsTable)
 }))
 
 export const orderLineItemsTable = pgTable("order_line_items", {
