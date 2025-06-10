@@ -1,4 +1,4 @@
-import db, { _projSelect, Projection } from '@config/drizzle/db'
+import db from '@config/drizzle/db'
 import { menusTable } from '@config/drizzle/tables/menus.table'
 import Repository from '@utils/types/repository'
 import { UUID } from '@utils/types/typebox/uuid'
@@ -6,13 +6,15 @@ import { and, eq } from 'drizzle-orm'
 import { itemsToMenusJTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { Timeless } from '@utils/types/typebox/timeless'
+import { _projSelect } from '@config/drizzle/query-wrappers'
+import { SelectProjection } from '@utils/types/drizzle/queries'
 
 export type Menu = typeof menusTable.$inferSelect
 export type NewMenu = typeof menusTable.$inferInsert
 export const tMenu = createSelectSchema(menusTable);
 export const tNewMenu = createInsertSchema(menusTable);
 
-type MenuProjection = Projection<typeof menusTable>;
+type MenuProjection = SelectProjection<typeof menusTable>;
 
 class MenuRepository extends Repository<typeof menusTable> {
 	index(projection?: MenuProjection) {
