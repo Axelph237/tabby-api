@@ -1,7 +1,7 @@
 import Repository from '@utils/types/repository'
 import { itemsTable } from '@config/drizzle/tables/items.table'
 import db, { _projSelect, Projection } from '@config/drizzle/db'
-import { eq, sql, SQL } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import ItemOptionRepository from '@features/item/itemOption.repository'
 

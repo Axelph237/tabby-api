@@ -3,16 +3,20 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidTObj } from '@utils/types/typebox/uuid'
 import MenuRepository, { tMenu, tNewMenu } from '@features/menu/menu.repository'
 import { tTimeless } from '@utils/types/typebox/timeless'
+import { _asUser } from '@config/drizzle/db'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.decorate("menuRepo", new MenuRepository())
 	.use(authMiddleware)
 	.guard({ isAuthenticated: true })
 	// 1.1 - Get user's menus
-	.get("/", async ({ menuRepo }) => menuRepo.index())
+	.get("/", async ({ menuRepo, user }) => _asUser(
+		user!.id,
+		menuRepo.index()
+	))
 	// 1.2 - Create new menu
-	.post("/", async ({ menuRepo, body }) => menuRepo.create(body),
-		{ body: tTimeless<typeof tNewMenu>(tNewMenu) })
+	.post("/", async ({ menuRepo, body, user }) => menuRepo.create({ createdBy: user!.id, ...body }),
+		{ body: t.Omit(tTimeless<typeof tNewMenu>(tNewMenu), ["createdBy"]) })
 	// Menu specific route
 	.group("/:menuId", { params: t.Object({ menuId: uuidTObj }) }, app => app
 			// 1.3 - Get menu details

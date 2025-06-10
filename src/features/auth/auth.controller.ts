@@ -25,7 +25,7 @@ export const authController = (init?: ControllerConfig) => new Elysia({
 					try {
 						return await sql.begin(async tx => {
 							// Get user id
-							const [ row ] = await tx`SELECT id FROM auth.user WHERE email = ${userInfo.email};`;
+							const [ row ] = await tx`SELECT id FROM auth.users WHERE email = ${userInfo.email};`;
 
 							const userId = row?.id ?? randomUUIDv7();
 							// Format user and account objects
@@ -40,14 +40,14 @@ export const authController = (init?: ControllerConfig) => new Elysia({
 								...tokens
 							}
 
-							await tx`INSERT INTO auth.user ${sql(user)} 
+							await tx`INSERT INTO auth.users ${sql(user)} 
 				    			ON CONFLICT (id) DO UPDATE SET
 				    			    email = ${user.email},
 								    email_verified = ${user.email_verified},
 								    image = ${user.image},
 								    updated_at = now();`;
 
-							await tx`INSERT INTO auth.account ${sql(account)} 
+							await tx`INSERT INTO auth.accounts ${sql(account)} 
 				    			ON CONFLICT (user_id, provider_id) DO UPDATE SET
 								    access_token = ${account.access_token},
 				    			    refresh_token = ${account.refresh_token},
