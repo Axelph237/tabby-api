@@ -9,7 +9,7 @@ export const orderRoutes = new Elysia({ prefix: "/orders/:sessId" })
 	.guard({ params: t.Object({ sessId: uuidTObj }) })
 	.decorate("orderRepo", new OrderRepository())
 	// 3.1 - Get all orders for a given session
-	.get("/", ({ params, orderRepo, user }) => 
+	.get("/", ({ orderRepo, user }) => 
 		_asUser(user?.id, orderRepo.index()), 
 		{
 			isAuthenticated: true
