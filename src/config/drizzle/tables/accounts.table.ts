@@ -1,5 +1,5 @@
 import { text, timestamp, unique, uuid } from 'drizzle-orm/pg-core'
-import { timestamps } from '@config/drizzle/types/timestamps'
+import { timestamps } from '@utils/types/drizzle/timestamps'
 import { authSchema } from '@config/drizzle/schemas'
 import { usersTable } from '@config/drizzle/tables/users.table'
 import { relations } from 'drizzle-orm'

@@ -1,10 +1,11 @@
-import { boolean, index, integer, pgTable, primaryKey, text, unique, uuid } from 'drizzle-orm/pg-core'
-import { timestamps } from '@config/drizzle/types/timestamps'
+import { boolean, index, integer, pgTable, primaryKey, text, unique, uuid, pgPolicy } from 'drizzle-orm/pg-core'
+import { timestamps } from '@utils/types/drizzle/timestamps'
 import { menusTable } from '@config/drizzle/tables/menus.table'
-import { user } from '@config/drizzle/types/user'
-import { relations } from 'drizzle-orm'
+import { user } from '@utils/types/drizzle/user'
+import { relations,  sql } from 'drizzle-orm'
 import { usersTable } from '@config/drizzle/tables/users.table'
 import { ordersTable } from '@config/drizzle/tables/orders.table'
+import { currentUser } from '../views'
 
 export const itemsTable = pgTable("items",{
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -15,7 +16,14 @@ export const itemsTable = pgTable("items",{
 	ownerId: user().notNull(),
 	...timestamps
 }, t => [
-	index("items_created_by_hash").using("hash", t.ownerId)
+	index("items_created_by_hash").using("hash", t.ownerId),
+	// Policies
+	pgPolicy("crudOwnItems", {
+		as: "permissive",
+		to: "authorized",
+		for: "all",
+		using: sql`owner_id = ${currentUser}`
+	})
 ])
 
 export const itemsRelations = relations(itemsTable, ({ one, many }) => ({
@@ -54,7 +62,27 @@ export const itemOptionsTable = pgTable("item_options", {
 	ownerId: user().notNull()
 }, t => [
 	unique().on(t.parentItemId, t.label),
-	index("item_options_created_by_hash").using("hash", t.ownerId)
+	index("item_options_created_by_hash").using("hash", t.ownerId),
+	// Policies
+	pgPolicy("crudOwnItemOptions", {
+		as: "restrictive",
+		to: "authorized",
+		for: "all",
+		using: sql`owner_id = ${currentUser}`,
+		withCheck: sql`owner_id = ${currentUser}`
+	}),
+	pgPolicy("insertWithOwnParentItems", {
+		as: "restrictive",
+		to: "authorized",
+		for: "insert",
+		withCheck: sql`EXISTS (SELECT 1 FROM items WHERE items.id = parent_item_id)`
+	}),
+	pgPolicy("updateWithOwnParentItems", {
+		as: "restrictive",
+		to: "authorized",
+		for: "update",
+		withCheck: sql`EXISTS (SELECT 1 FROM items WHERE items.id = parent_item_id)`
+	})
 ])
 
 export const itemOptionsRelations = relations(itemOptionsTable, ({ one, many }) => ({
@@ -79,7 +107,43 @@ export const itemSelectionsTable = pgTable("item_selections", {
 	ownerId: user().notNull()
 }, t => [
 	unique().on(t.parentOptionId, t.parentItemId, t.label),
-	index("item_selections_created_by_hash").using("hash", t.ownerId)
+	index("item_selections_created_by_hash").using("hash", t.ownerId),
+	// Policies
+	pgPolicy("crudOwnItemSelections", {
+		as: "restrictive",
+		to: "authorized",
+		for: "all",
+		using: sql`owner_id = ${currentUser}`,
+		withCheck: sql`owner_id = ${currentUser}`
+	}),
+	pgPolicy("insertWithOwnParentItems", {
+		as: "restrictive",
+		to: "authorized",
+		for: "insert",
+		withCheck: sql`EXISTS (SELECT 1 FROM items WHERE items.id = parent_item_id)`
+	}),
+	pgPolicy("updateWithOwnParentItems", {
+		as: "restrictive",
+		to: "authorized",
+		for: "update",
+		withCheck: sql`EXISTS (SELECT 1 FROM items WHERE items.id = parent_item_id)`
+	}),
+	pgPolicy("insertWithOwnParentOptions", {
+		as: "restrictive",
+		to: "authorized",
+		for: "insert",
+		withCheck: sql`
+			parent_option_id = NULL 
+			OR EXISTS (SELECT 1 FROM item_options WHERE item_options.id = parent_option_id)`
+	}),
+	pgPolicy("updateWithOwnParentOptions", {
+		as: "restrictive",
+		to: "authorized",
+		for: "update",
+		withCheck: sql`
+			parent_option_id = NULL
+			OR EXISTS (SELECT 1 FROM item_options WHERE item_options.id = parent_option_id)`
+	})	
 ])
 
 export const itemSelectionsRelations = relations(itemSelectionsTable, ({ one, many  }) => ({
