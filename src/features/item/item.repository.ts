@@ -3,7 +3,7 @@ import { itemsTable } from '@config/drizzle/tables/items.table'
 import db, { _projSelect, Projection } from '@config/drizzle/db'
 import { eq, sql } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
-import ItemOptionRepository from '@features/item/itemOption.repository'
+import ItemOptionRepository from '@features/item/item-option.repository'
 
 type ItemProjection = Projection<typeof itemsTable>;
 export type Item = typeof itemsTable.$inferSelect;

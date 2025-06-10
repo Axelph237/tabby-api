@@ -3,8 +3,8 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { messageResponseObj } from '@utils/types/typebox/messageResponse'
 import ItemRepository, { tNewItem } from '@features/item/item.repository'
 import { tTimeless } from '@utils/types/typebox/timeless'
-import { tNewItemOption } from '@features/item/itemOption.repository'
-import { tNewItemSelection } from '@features/item/itemSelection.repository'
+import { tNewItemOption } from '@features/item/item-option.repository'
+import { tNewItemSelection } from '@features/item/item-selection.repository'
 
 const itemRepo = new Elysia()
 	.decorate("itemRepo", new ItemRepository())
