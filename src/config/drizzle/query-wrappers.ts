@@ -12,9 +12,12 @@ export function _projSelect<P extends PgTableWithColumns<any>>(projection?: Sele
 	return (projection ? db.select(projection) : db.select())
 }
 
-export function _asUser(userId: UUID, query: AnyDrizzleQuery): Promise<NeonQueryResult> {
+export function _asUser(userId: UUID | undefined, query: AnyDrizzleQuery): Promise<NeonQueryResult> {
 	const BATCH_SIZE = 5;
 	const RELEVANT_QUERY = 2;
+
+	if (!userId || typeof userId !== "string")
+		throw TypeError(`Expected userId to be a string, but received ${userId}`);
 
 	return new Promise(async (resolve, reject) => {
 		const result: NeonQueryResult[] = await db.batch([

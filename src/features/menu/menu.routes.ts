@@ -10,29 +10,32 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.use(authMiddleware)
 	.guard({ isAuthenticated: true })
 	// 1.1 - Get user's menus
-	.get("/", async ({ menuRepo, user }) => _asUser(
-		user!.id,
-		menuRepo.index()
-	))
+	.get("/", async ({ menuRepo, user }) => 
+		_asUser(user?.id, menuRepo.index()))
 	// 1.2 - Create new menu
-	.post("/", async ({ menuRepo, body, user }) => menuRepo.create({ createdBy: user!.id, ...body }),
-		{ body: t.Omit(tTimeless<typeof tNewMenu>(tNewMenu), ["createdBy"]) })
+	.post("/", async ({ menuRepo, body, user }) => 
+		_asUser(user?.id, menuRepo.create({ ownerId: user!.id, ...body })),
+		{ 
+			body: t.Omit(tTimeless<typeof tNewMenu>(tNewMenu), ["ownerId"]) 
+		})
 	// Menu specific route
 	.group("/:menuId", { params: t.Object({ menuId: uuidTObj }) }, app => app
 			// 1.3 - Get menu details
-			.get("/", async ({ params, menuRepo }) => menuRepo.get(params.menuId))
+			.get("/", async ({ params, menuRepo, user }) => 
+				_asUser(user?.id, menuRepo.get(params.menuId)))
 			// 1.4 - Add item to menu
-			.post("/items", async ({ params, body, menuRepo }) => {
-				await menuRepo.$addItemToMenu(body.itemId, params.menuId);
-				return {
-					message: "Successfully added item."
-				}
-			}, { body: t.Object({ itemId: t.Integer() }) })
+			.post("/items", async ({ params, body, menuRepo, user }) =>
+				_asUser(user?.id, menuRepo.$addItemToMenu(body.itemId, params.menuId)),
+				{ 
+					body: t.Object({ itemId: t.Integer() }) 
+				})
 			// 1.5 - Remove item from menu
-			.delete("/items/:itemId", async ({ params, menuRepo }) => {
-				await menuRepo.$removeItemFromMenu(params.itemId, params.menuId)
+			.delete("/items/:itemId", async ({ params, menuRepo, user }) => {
+				await _asUser(user?.id, menuRepo.$removeItemFromMenu(params.itemId, params.menuId))
 				return {
 					message: "Successfully deleted item."
 				}
-			}, { params: t.Object({ itemId: t.Integer() }) })
+				}, { 
+					params: t.Object({ itemId: t.Integer() }) 
+				})
 	)

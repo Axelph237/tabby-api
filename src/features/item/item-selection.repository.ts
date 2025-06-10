@@ -1,10 +1,12 @@
-import db, { _projSelect, Projection } from '@config/drizzle/db'
+import db from '@config/drizzle/db'
 import { itemSelectionsTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import Repository from '@utils/types/repository'
 import { eq } from 'drizzle-orm'
+import { _projSelect } from '@config/drizzle/query-wrappers'
+import { SelectProjection } from '@utils/types/drizzle/queries'
 
-type ItemSelectionProjection = Projection<typeof itemSelectionsTable>;
+type ItemSelectionProjection = SelectProjection<typeof itemSelectionsTable>;
 export type ItemSelection = typeof itemSelectionsTable.$inferSelect;
 export type NewItemSelection = typeof itemSelectionsTable.$inferInsert;
 export const tItemSelection = createSelectSchema(itemSelectionsTable);
