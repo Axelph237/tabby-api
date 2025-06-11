@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { jwtPlugin } from '@config/jwt'
 import parseOAuth2Tokens from '@utils/parseOAuthTokens'
 import { oauthPlugin } from '@config/oauth'
-import { authSetup } from "../auth.routes";
+import { authSetup } from "../auth.setup";
 
 export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
     .use(jwtPlugin)
