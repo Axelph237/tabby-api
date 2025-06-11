@@ -1,14 +1,28 @@
-import { Elysia, t } from 'elysia'
-import { userController } from '@features/user/user.controller'
+import { Elysia } from 'elysia'
+import { authMiddleware } from '@middlewares/auth.middleware'
+import UserRepository from './user.repository'
+import { _asUser } from '@config/drizzle/query-wrappers'
+import { usersTable } from '@config/drizzle/tables/users.table'
+import { UUID } from '@utils/types/typebox/uuid'
 
 export const userRoutes = new Elysia({ prefix: "/user" })
-	.use(userController({
-		name: "uc"
-	}))
-	// .use(authMiddleware)
-	.get("/me", async ({ uc }) => {
-		const email = await uc.getMe();
-		return {
-			email
-		}
+	.use(authMiddleware)
+	.decorate("userRepo", new UserRepository())
+	.get("/me", async ({ userRepo, user, error }) => {
+		// Technically authorization was verified, but user's credentials were not found -> 404
+		if (!user)
+			return error(404, "User not found.");
+
+		const result = await _asUser<{ email: string }>(
+			user.id, 
+			userRepo.get(user.id, { email: usersTable.email })
+		);
+
+		// Ensure that resultRows exists
+		if (!result.rows)
+			return error(404, "User not found in database.");
+
+		return { email: result.rows[0].email }
+	}, {
+		isAuthenticated: true
 	})
