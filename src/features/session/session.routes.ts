@@ -1,48 +1,30 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidTObj } from '@utils/types/typebox/uuid'
-import { sessionController } from '@features/session/session.controller'
 import { sessionDetailsTObj } from '@features/session/session.validation'
+import SessionRepository, { tNewSession } from './session.repository'
+import { _asUser } from '@config/drizzle/query-wrappers'
 
 export const sessionRoutes = new Elysia({ prefix: "/sessions" })
-	.use(sessionController({
-		name: "sc"
-	}))
 	.use(authMiddleware)
+	.decorate("sessionRepo", new SessionRepository())
 	// 4.1 - Create new session
-	.post("/", async ({ body, sc }) => {
-		const session_id = await sc.createSession(body.menu_id, body.session_admins, body.expires_at);
-		return { session_id };
-	}, {
-		isAuthenticated: true,
-		body: t.Object({
-			menu_id: uuidTObj,
-			session_admins: t.Array(uuidTObj),
-			expires_at: t.Optional(t.Date())
-		}),
-		response: t.Object({
-			session_id: uuidTObj
-		})
-	})
-	.group(
-		"/:sessId",
+	.post("/", async ({ body, sessionRepo, user }) => 
+		_asUser(user?.id, sessionRepo.create(body)), 
 		{
-			params: t.Object({
-				sessId: uuidTObj
-			})
-		},
-		app => app
+			isAuthenticated: true,
+			body: tNewSession
+		})
+	.group("/:sessId", { params: t.Object({ sessId: uuidTObj }) }, app => app
 			// 4.2 - Close session
-			.delete("/", ({  }) => {
-				return "STUB ROUTE"
-			}, {
-				isAuthenticated: true
-			})
+			.delete("/", async ({ params, sessionRepo, user }) => {
+				await _asUser(user?.id, sessionRepo.remove(params.sessId))
+				return { message: "Successfully deleted session" }
+				}, {
+					isAuthenticated: true
+				})
 			// 4.3 - Get session public details
-			.get("/", ({ params, sc }) => {
-				return sc.getSessionDetails(params.sessId);
-			}, {
-				response: sessionDetailsTObj
-			})
+			.get("/", ({ params, sessionRepo, user }) => 
+				_asUser(user?.id, sessionRepo.get(params.sessId)))
 	)
 
