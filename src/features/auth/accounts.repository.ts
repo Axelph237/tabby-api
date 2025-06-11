@@ -1,7 +1,7 @@
 import db from '@config/drizzle/db'
 import Repository from '@utils/types/repository'
 import { UUID } from '@utils/types/typebox/uuid'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { Timeless } from '@utils/types/typebox/timeless'
 import { projSelect } from '@config/drizzle/query-wrappers'
@@ -47,7 +47,7 @@ class AccountRepository extends Repository<typeof accountsTable> {
         userInfo: Partial<Omit<Timeless<User>, "id">> & Pick<User, "email" | "emailVerified">
     ) {
         const userRepo = new UserRepository();
-
+        
         // Get existing user's id
         const [ firstRow ] = await userRepo.$getByEmail(userInfo.email);
 
@@ -64,9 +64,9 @@ class AccountRepository extends Repository<typeof accountsTable> {
 			...tokens
 		}
 
-        await db.batch([
+        const result = await db.batch([
             userRepo.create(user).onConflictDoUpdate({ target: usersTable.id, set: user }),
-            this.create(account).onConflictDoUpdate({ target: accountsTable.id, set: account })
+            this.create(account).onConflictDoUpdate({ target: [accountsTable.providerId, accountsTable.userId], set: account })
         ])
 
         return userId;
