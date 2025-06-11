@@ -2,7 +2,6 @@ import { Elysia } from 'elysia'
 // import jwt, { JWTOption } from '@elysiajs/jwt'
 import { UUID } from '@utils/types/typebox/uuid'
 import { jwtPlugin } from '@config/jwt'
-import { _asUser, type AnyDrizzleQuery } from '@config/drizzle/db';
 
 // const jwtConfig: JWTOption = {
 // 	name: "jwt",
