@@ -21,7 +21,8 @@ export const userRoutes = new Elysia({ prefix: "/user" })
 		if (!result.rows)
 			return error(404, "User not found in database.");
 
-		return { email: result.rows[0].email }
+		const [ firstEntry ] = result.rows;
+		return { email: firstEntry.email }
 	}, {
 		isAuthenticated: true
 	})
