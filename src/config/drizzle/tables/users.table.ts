@@ -7,7 +7,7 @@ import { currentUser } from '../views'
 
 export const usersTable = authSchema.table("users", {
 	id: uuid().primaryKey().defaultRandom(),
-	name: text().notNull(),
+	name: text().notNull().default("New User"),
 	email: text().notNull(),
 	emailVerified: boolean().notNull(),
 	image: text(),

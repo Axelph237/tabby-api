@@ -35,6 +35,10 @@ class UserRepository extends Repository<typeof usersTable> {
     remove(id: UUID) {
         return db.delete(usersTable).where(eq(usersTable.id, id)).$dynamic();
     }
+
+    $getByEmail(email: string, projection?: UsersProjection) {
+        return projSelect<typeof usersTable>(projection).from(usersTable).where(eq(usersTable.email, email)).limit(1).$dynamic();
+    }
 }
 
 export default UserRepository;
