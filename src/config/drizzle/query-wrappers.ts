@@ -9,7 +9,7 @@ export function _projSelect<P extends PgTableWithColumns<any>>(projection?: Sele
 	return (projection ? db.select(projection) : db.select())
 }
 
-export function _asUser(userId: UUID | undefined, query: AnySimpleQuery): Promise<NeonQueryResult> {
+export function _asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
 	const BATCH_SIZE = 5;
 	const RELEVANT_QUERY = 2;
 
@@ -17,7 +17,7 @@ export function _asUser(userId: UUID | undefined, query: AnySimpleQuery): Promis
 		throw TypeError(`Expected userId to be a string, but received ${userId}`);
 
 	return new Promise(async (resolve, reject) => {
-		const result: NeonQueryResult[] = await db.batch([
+		const result: NeonQueryResult<T>[] = await db.batch([
 			db.execute(sql`SET ROLE authorized;`),
 			db.execute(sql`SELECT set_config('tabby.transaction.current_user', '${sql.raw(userId)}', TRUE)`),
 			query,
@@ -32,12 +32,12 @@ export function _asUser(userId: UUID | undefined, query: AnySimpleQuery): Promis
 	})
 }
 
-export function _asGuest(query: AnySimpleQuery): Promise<NeonQueryResult> {
+export function _asGuest<T>(query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
 	const BATCH_SIZE = 3;
 	const RELEVANT_QUERY = 1;
 
 	return new Promise(async (resolve, reject) => {
-		const result: NeonQueryResult[] = await db.batch([
+		const result: NeonQueryResult<T>[] = await db.batch([
 			db.execute(sql`SET ROLE guest;`),
 			query,
 			db.execute(sql`RESET ROLE;`)
