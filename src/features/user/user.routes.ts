@@ -3,7 +3,6 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import UserRepository from './user.repository'
 import { asUser } from '@config/drizzle/query-wrappers'
 import { usersTable } from '@config/drizzle/tables/users.table'
-import { UUID } from '@utils/types/typebox/uuid'
 
 export const userRoutes = new Elysia({ prefix: "/user" })
 	.use(authMiddleware)
