@@ -3,7 +3,7 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidTObj } from '@utils/types/typebox/uuid'
 import MenuRepository, { tMenu, tNewMenu } from '@features/menu/menu.repository'
 import { tTimeless } from '@utils/types/typebox/timeless'
-import { _asUser } from '@config/drizzle/query-wrappers'
+import { asUser } from '@config/drizzle/query-wrappers'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.decorate("menuRepo", new MenuRepository())
@@ -11,10 +11,10 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.guard({ isAuthenticated: true })
 	// 1.1 - Get user's menus
 	.get("/", async ({ menuRepo, user }) => 
-		_asUser(user?.id, menuRepo.index()))
+		asUser(user?.id, menuRepo.index()))
 	// 1.2 - Create new menu
 	.post("/", async ({ menuRepo, body, user }) => 
-		_asUser(user?.id, menuRepo.create({ ownerId: user!.id, ...body })),
+		asUser(user?.id, menuRepo.create({ ownerId: user!.id, ...body })),
 		{ 
 			body: t.Omit(tTimeless<typeof tNewMenu>(tNewMenu), ["ownerId"]) 
 		})
@@ -22,16 +22,16 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.group("/:menuId", { params: t.Object({ menuId: uuidTObj }) }, app => app
 			// 1.3 - Get menu details
 			.get("/", async ({ params, menuRepo, user }) => 
-				_asUser(user?.id, menuRepo.get(params.menuId)))
+				asUser(user?.id, menuRepo.get(params.menuId)))
 			// 1.4 - Add item to menu
 			.post("/items", async ({ params, body, menuRepo, user }) =>
-				_asUser(user?.id, menuRepo.$addItemToMenu(body.itemId, params.menuId)),
+				asUser(user?.id, menuRepo.$addItemToMenu(body.itemId, params.menuId)),
 				{ 
 					body: t.Object({ itemId: t.Integer() }) 
 				})
 			// 1.5 - Remove item from menu
 			.delete("/items/:itemId", async ({ params, menuRepo, user }) => {
-				await _asUser(user?.id, menuRepo.$removeItemFromMenu(params.itemId, params.menuId))
+				await asUser(user?.id, menuRepo.$removeItemFromMenu(params.itemId, params.menuId))
 				return {
 					message: "Successfully deleted item."
 				}

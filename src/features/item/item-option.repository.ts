@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import Repository from '@utils/types/repository'
 import { eq, sql } from 'drizzle-orm'
 import { SelectProjection } from '@utils/types/drizzle/queries'
-import { _projSelect } from '@config/drizzle/query-wrappers'
+import { projSelect } from '@config/drizzle/query-wrappers'
 
 type ItemOptionProjection = SelectProjection<typeof itemOptionsTable>;
 export type ItemOption = typeof itemOptionsTable.$inferSelect;
@@ -22,11 +22,11 @@ class ItemOptionRepository extends Repository<typeof itemOptionsTable> {
 		}).toSQL().sql)
 
 	index(projection?: ItemOptionProjection) {
-		return _projSelect(projection).from(ItemOptionRepository.#objsView).$dynamic();
+		return projSelect(projection).from(ItemOptionRepository.#objsView).$dynamic();
 	}
 
 	get(id: number, projection?: ItemOptionProjection) {
-		return _projSelect(projection).from(ItemOptionRepository.#objsView)
+		return projSelect(projection).from(ItemOptionRepository.#objsView)
 			.limit(1).where(eq(itemOptionsTable.id, id)).$dynamic();
 	}
 

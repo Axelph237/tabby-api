@@ -3,7 +3,7 @@ import { itemSelectionsTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import Repository from '@utils/types/repository'
 import { eq } from 'drizzle-orm'
-import { _projSelect } from '@config/drizzle/query-wrappers'
+import { projSelect } from '@config/drizzle/query-wrappers'
 import { SelectProjection } from '@utils/types/drizzle/queries'
 
 type ItemSelectionProjection = SelectProjection<typeof itemSelectionsTable>;
@@ -14,11 +14,11 @@ export const tNewItemSelection = createInsertSchema(itemSelectionsTable);
 
 class ItemSelectionRepository extends Repository<typeof itemSelectionsTable> {
 	index(projection?: ItemSelectionProjection) {
-		return _projSelect(projection).from(itemSelectionsTable).$dynamic();
+		return projSelect(projection).from(itemSelectionsTable).$dynamic();
 	}
 
 	get(id: number, projection?: ItemSelectionProjection) {
-		return _projSelect(projection).from(itemSelectionsTable).where(eq(itemSelectionsTable.id, id)).$dynamic();
+		return projSelect(projection).from(itemSelectionsTable).where(eq(itemSelectionsTable.id, id)).$dynamic();
 	}
 
 	create(itemSelection: NewItemSelection) {

@@ -4,7 +4,7 @@ import { UUID } from '@utils/types/typebox/uuid'
 import { eq } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { Timeless } from '@utils/types/typebox/timeless'
-import { _projSelect } from '@config/drizzle/query-wrappers'
+import { projSelect } from '@config/drizzle/query-wrappers'
 import { SelectProjection } from '@utils/types/drizzle/queries'
 import { sessionsTable } from '@config/drizzle/tables/sessions.table'
 
@@ -17,11 +17,11 @@ type SessionsProjection = SelectProjection<typeof sessionsTable>;
 
 class SessionRepository extends Repository<typeof sessionsTable> {
     index(projection?: SessionsProjection) {
-        return _projSelect(projection).from(sessionsTable).$dynamic();
+        return projSelect(projection).from(sessionsTable).$dynamic();
     }
 
     get(id: UUID, projection?: SessionsProjection) {
-        return _projSelect(projection).from(sessionsTable).where(eq(sessionsTable.id, id)).$dynamic();
+        return projSelect(projection).from(sessionsTable).where(eq(sessionsTable.id, id)).$dynamic();
     }
 
     create(session: Timeless<NewSession>) {

@@ -6,7 +6,7 @@ import { and, eq } from 'drizzle-orm'
 import { itemsToMenusJTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { Timeless } from '@utils/types/typebox/timeless'
-import { _projSelect } from '@config/drizzle/query-wrappers'
+import { projSelect } from '@config/drizzle/query-wrappers'
 import { SelectProjection } from '@utils/types/drizzle/queries'
 
 export type Menu = typeof menusTable.$inferSelect
@@ -18,11 +18,11 @@ type MenuProjection = SelectProjection<typeof menusTable>;
 
 class MenuRepository extends Repository<typeof menusTable> {
 	index(projection?: MenuProjection) {
-		return _projSelect(projection).from(menusTable).$dynamic();
+		return projSelect(projection).from(menusTable).$dynamic();
 	}
 
 	get(id: UUID, projection?: MenuProjection) {
-		return _projSelect(projection).from(menusTable).where(eq(menusTable.id, id)).$dynamic();
+		return projSelect(projection).from(menusTable).where(eq(menusTable.id, id)).$dynamic();
 	}
 
 	create(menu: Timeless<NewMenu>) {

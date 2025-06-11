@@ -5,11 +5,11 @@ import db from "./db";
 import { AnyQuery, AnySimpleQuery, NeonQueryResult, SelectProjection } from "@utils/types/drizzle/queries";
 import { UUID } from "@utils/types/typebox/uuid";
 
-export function _projSelect<P extends PgTableWithColumns<any>>(projection?: SelectProjection<P>) {
+export function projSelect<P extends PgTableWithColumns<any>>(projection?: SelectProjection<P>) {
 	return (projection ? db.select(projection) : db.select())
 }
 
-export function _asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
+export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
 	const BATCH_SIZE = 5;
 	const RELEVANT_QUERY = 2;
 
@@ -32,7 +32,7 @@ export function _asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Pro
 	})
 }
 
-export function _asGuest<T>(query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
+export function asGuest<T>(query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
 	const BATCH_SIZE = 3;
 	const RELEVANT_QUERY = 1;
 
@@ -50,7 +50,7 @@ export function _asGuest<T>(query: AnySimpleQuery): Promise<NeonQueryResult<T>> 
 	})
 }
 
-export function _asUserTransaction<T = any>(userId: UUID, promise: Promise<T>): Promise<T> {
+export function asUserTransaction<T = any>(userId: UUID, promise: Promise<T>): Promise<T> {
 	return db.transaction(async (tx) => {
 		await tx.execute(sql`SET ROLE authorized;`);
 		await tx.execute(sql`SELECT set_config('tabby.transaction.current_user', '${sql.raw(userId)}', TRUE)`);
@@ -64,7 +64,7 @@ export function _asUserTransaction<T = any>(userId: UUID, promise: Promise<T>): 
 	})
 }
 
-export function _asGuestTransaction<T = any>(promise: Promise<T>): Promise<T> {
+export function asGuestTransaction<T = any>(promise: Promise<T>): Promise<T> {
 	return db.transaction(async (tx) => {
 		await tx.execute(sql`SET ROLE guest;`);
 		const result = await promise;

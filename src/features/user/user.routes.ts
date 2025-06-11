@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import UserRepository from './user.repository'
-import { _asUser } from '@config/drizzle/query-wrappers'
+import { asUser } from '@config/drizzle/query-wrappers'
 import { usersTable } from '@config/drizzle/tables/users.table'
 import { UUID } from '@utils/types/typebox/uuid'
 
@@ -13,7 +13,7 @@ export const userRoutes = new Elysia({ prefix: "/user" })
 		if (!user)
 			return error(404, "User not found.");
 
-		const result = await _asUser<{ email: string }>(
+		const result = await asUser<{ email: string }>(
 			user.id, 
 			userRepo.get(user.id, { email: usersTable.email })
 		);

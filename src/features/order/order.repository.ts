@@ -3,7 +3,7 @@ import Repository from '@utils/types/repository'
 import { eq } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { Timeless } from '@utils/types/typebox/timeless'
-import { _projSelect } from '@config/drizzle/query-wrappers'
+import { projSelect } from '@config/drizzle/query-wrappers'
 import { SelectProjection } from '@utils/types/drizzle/queries'
 import { orderLineItemsTable, ordersTable } from '@config/drizzle/tables/orders.table'
 
@@ -21,11 +21,11 @@ type OrderProjection = SelectProjection<typeof ordersTable>;
 
 class OrderRepository extends Repository<typeof ordersTable> {
 	index(projection?: OrderProjection) {
-		return _projSelect(projection).from(ordersTable).$dynamic();
+		return projSelect(projection).from(ordersTable).$dynamic();
 	}
 
 	get(id: number, projection?: OrderProjection) {
-		return _projSelect(projection).from(ordersTable).where(eq(ordersTable.id, id)).$dynamic();
+		return projSelect(projection).from(ordersTable).where(eq(ordersTable.id, id)).$dynamic();
 	}
 
 	create(order: Timeless<NewOrder>) {
