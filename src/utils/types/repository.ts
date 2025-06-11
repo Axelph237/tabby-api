@@ -1,4 +1,4 @@
-import { Projection } from '@config/drizzle/db'
+import { SelectProjection } from '@utils/types/drizzle/queries'
 import {
 	PgDeleteDynamic,
 	PgInsertDynamic,
@@ -11,7 +11,7 @@ abstract class Repository<TTable extends PgTableWithColumns<any>> {
 
 	abstract index(projection?: InferSelectModel<TTable>): PgSelectDynamic<any>;
 
-	abstract get(id: unknown, projection?: Projection<TTable>): PgSelectDynamic<any>;
+	abstract get(id: unknown, projection?: SelectProjection<TTable>): PgSelectDynamic<any>;
 
 	abstract create(item: InferInsertModel<TTable>): PgInsertDynamic<any>;
 
