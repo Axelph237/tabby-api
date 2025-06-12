@@ -17,8 +17,6 @@ export const userRoutes = new Elysia({ prefix: "/user" })
 			userRepo.get(user.id, { email: usersTable.email })
 		);
 
-		console.log(`User in database for user ${user.id}`, result);
-
 		// Ensure that resultRows exists
 		const [ firstEntry ] = result;
 		if (!firstEntry)
