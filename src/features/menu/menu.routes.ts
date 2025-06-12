@@ -10,7 +10,7 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.use(authMiddleware)
 	.guard({ isAuthenticated: true })
 	// 1.1 - Get user's menus
-	.get("/", async ({ menuRepo, user }) => 
+	.get("/", async ({ menuRepo, user }) =>
 		asUser(user?.id, menuRepo.index()))
 	// 1.2 - Create new menu
 	.post("/", async ({ menuRepo, body, user }) => 
