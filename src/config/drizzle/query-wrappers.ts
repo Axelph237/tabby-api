@@ -9,7 +9,7 @@ export function projSelect<P extends PgTableWithColumns<any>>(projection?: Selec
 	return (projection ? db.select(projection) : db.select())
 }
 
-export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
+export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Promise<T> {
 	const BATCH_SIZE = 5;
 	const RELEVANT_QUERY = 2;
 
@@ -17,7 +17,7 @@ export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Prom
 		throw TypeError(`Expected userId to be a string, but received ${userId}`);
 
 	return new Promise(async (resolve, reject) => {
-		const result: NeonQueryResult<T>[] = await db.batch([
+		const result: (NeonQueryResult | T)[] = await db.batch([
 			db.execute(sql`SET ROLE authorized;`),
 			db.execute(sql`SELECT set_config('tabby.transaction.current_user', '${sql.raw(userId)}', TRUE)`),
 			query,
@@ -28,16 +28,16 @@ export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Prom
 		if (result.length !== BATCH_SIZE)
 			reject("_asUser() query wrapper returned unexpected results.")
 
-		resolve(result[RELEVANT_QUERY]);
+		resolve(result[RELEVANT_QUERY] as T);
 	})
 }
 
-export function asGuest<T>(query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
+export function asGuest<T>(query: AnySimpleQuery): Promise<T> {
 	const BATCH_SIZE = 3;
 	const RELEVANT_QUERY = 1;
 
 	return new Promise(async (resolve, reject) => {
-		const result: NeonQueryResult<T>[] = await db.batch([
+		const result: (NeonQueryResult | T)[] = await db.batch([
 			db.execute(sql`SET ROLE guest;`),
 			query,
 			db.execute(sql`RESET ROLE;`)
@@ -46,7 +46,7 @@ export function asGuest<T>(query: AnySimpleQuery): Promise<NeonQueryResult<T>> {
 		if (result.length !== BATCH_SIZE)
 			reject("_asGuest() query wrapper returned unexpected results.")
 
-		resolve(result[RELEVANT_QUERY]);
+		resolve(result[RELEVANT_QUERY] as T);
 	})
 }
 

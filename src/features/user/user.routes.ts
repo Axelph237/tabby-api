@@ -12,16 +12,18 @@ export const userRoutes = new Elysia({ prefix: "/user" })
 		if (!user)
 			return error(404, "User not found.");
 
-		const result = await asUser<{ email: string }>(
+		const result = await asUser<{ email: string }[]>(
 			user.id, 
 			userRepo.get(user.id, { email: usersTable.email })
 		);
 
+		console.log(`User in database for user ${user.id}`, result);
+
 		// Ensure that resultRows exists
-		if (!result.rows)
+		const [ firstEntry ] = result;
+		if (!firstEntry)
 			return error(404, "User not found in database.");
 
-		const [ firstEntry ] = result.rows;
 		return { email: firstEntry.email }
 	}, {
 		isAuthenticated: true
