@@ -73,3 +73,12 @@ export function asGuestTransaction<T = any>(promise: Promise<T>): Promise<T> {
 		return result;
 	})
 }
+
+export async function queryOne<T>(promise: Promise<Array<T>>): Promise<T | null> {
+	const res = await promise;
+
+	if (res.length > 0)
+		return res[0];
+
+	return null;
+}

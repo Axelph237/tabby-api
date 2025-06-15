@@ -4,6 +4,6 @@ export const oauthPlugin = oauth2({
 	Google: [
 		process.env.GOOGLE_CLIENT_ID!,
 		process.env.GOOGLE_CLIENT_SECRET!,
-		process.env.ORIGIN + "/auth/google/callback",
+		(process.env.ORIGIN || "http://localhost:3000") + "/auth/google/callback",
 	]
 })

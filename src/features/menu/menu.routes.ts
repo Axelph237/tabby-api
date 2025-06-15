@@ -3,7 +3,8 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidTObj } from '@utils/types/typebox/uuid'
 import MenuRepository, { tMenu, tNewMenu } from '@features/menu/menu.repository'
 import { tTimeless } from '@utils/types/typebox/timeless'
-import { asUser } from '@config/drizzle/query-wrappers'
+import { asUser, queryOne } from '@config/drizzle/query-wrappers'
+import { Menu } from './menu.validation'
 
 export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.decorate("menuRepo", new MenuRepository())
@@ -11,7 +12,7 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.guard({ isAuthenticated: true })
 	// 1.1 - Get user's menus
 	.get("/", async ({ menuRepo, user }) =>
-		asUser(user?.id, menuRepo.index()))
+		asUser<Menu[]>(user?.id, menuRepo.index()))
 	// 1.2 - Create new menu
 	.post("/", async ({ menuRepo, body, user }) => 
 		asUser(user?.id, menuRepo.create({ ownerId: user!.id, ...body })),
@@ -22,7 +23,7 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 	.group("/:menuId", { params: t.Object({ menuId: uuidTObj }) }, app => app
 			// 1.3 - Get menu details
 			.get("/", async ({ params, menuRepo, user }) => 
-				asUser(user?.id, menuRepo.get(params.menuId)))
+				queryOne(asUser<Menu[]>(user?.id, menuRepo.get(params.menuId))))
 			// 1.4 - Add item to menu
 			.post("/items", async ({ params, body, menuRepo, user }) =>
 				asUser(user?.id, menuRepo.$addItemToMenu(body.itemId, params.menuId)),
