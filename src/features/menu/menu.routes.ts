@@ -24,6 +24,11 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 			// 1.3 - Get menu details
 			.get("/", async ({ params, menuRepo, user }) => 
 				queryOne(asUser<Menu[]>(user?.id, menuRepo.get(params.menuId))))
+			.put("/", async ({ params, body, menuRepo, user }) =>
+				console.log(body), 
+				{
+					body: t.Partial(tTimeless(tNewMenu))
+				})
 			// 1.4 - Add item to menu
 			.post("/items", async ({ params, body, menuRepo, user }) =>
 				asUser(user?.id, menuRepo.$addItemToMenu(body.itemId, params.menuId)),
