@@ -48,7 +48,7 @@ export const GoogleAuthRoutes = new Elysia({ prefix: "/google" })
             iat: Math.floor(Date.now() / 1000),
             exp: Math.floor(parsedTokens.accessTokenExpiresAt.getTime() / 1000)
         });
-        console.log("Generated JWT:", value);
+        // console.log("Generated JWT:", value);
 
         // set http-only cookie
         auth.set({
