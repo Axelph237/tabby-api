@@ -25,7 +25,7 @@ export const menuRoutes = new Elysia({ prefix: '/menus' })
 			.get("/", async ({ params, menuRepo, user }) => 
 				queryOne(asUser<Menu[]>(user?.id, menuRepo.get(params.menuId))))
 			.put("/", async ({ params, body, menuRepo, user }) =>
-				console.log(body), 
+				queryOne(asUser<Menu[]>(user?.id, menuRepo.update({ id: params.menuId, ...body }).returning())), 
 				{
 					body: t.Partial(tTimeless(tNewMenu))
 				})

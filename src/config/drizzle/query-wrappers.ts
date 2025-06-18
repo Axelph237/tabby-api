@@ -2,14 +2,14 @@ import { sql } from "drizzle-orm";
 import { PgTableWithColumns } from "drizzle-orm/pg-core";
 import { NeonHttpQueryResult } from "drizzle-orm/neon-http";
 import db from "./db";
-import { AnyQuery, AnySimpleQuery, NeonQueryResult, SelectProjection } from "@utils/types/drizzle/queries";
+import { AnyDynamicQuery, AnyQuery, AnySimpleQuery, NeonQueryResult, SelectProjection } from "@utils/types/drizzle/queries";
 import { UUID } from "@utils/types/typebox/uuid";
 
 export function projSelect<P extends PgTableWithColumns<any>>(projection?: SelectProjection<P>) {
 	return (projection ? db.select(projection) : db.select())
 }
 
-export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Promise<T> {
+export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery | AnyDynamicQuery): Promise<T> {
 	const BATCH_SIZE = 5;
 	const RELEVANT_QUERY = 2;
 
@@ -32,7 +32,7 @@ export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery): Prom
 	})
 }
 
-export function asGuest<T>(query: AnySimpleQuery): Promise<T> {
+export function asGuest<T>(query: AnySimpleQuery | AnyDynamicQuery): Promise<T> {
 	const BATCH_SIZE = 3;
 	const RELEVANT_QUERY = 1;
 
