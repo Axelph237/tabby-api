@@ -1,10 +1,11 @@
 import db from '@config/drizzle/db'
-import { itemOptionsTable } from '@config/drizzle/tables/items.table'
+import { itemOptionsTable, itemSelectionsTable } from '@config/drizzle/tables/items.table'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import Repository from '@utils/types/repository'
 import { eq, sql } from 'drizzle-orm'
 import { SelectProjection } from '@utils/types/drizzle/queries'
 import { projSelect } from '@config/drizzle/query-wrappers'
+import ItemSelectionRepository from './item-selection.repository'
 
 type ItemOptionProjection = SelectProjection<typeof itemOptionsTable>;
 export type ItemOption = typeof itemOptionsTable.$inferSelect;
@@ -13,6 +14,12 @@ export const tItemOption = createSelectSchema(itemOptionsTable);
 export const tNewItemOption = createInsertSchema(itemOptionsTable);
 
 class ItemOptionRepository extends Repository<typeof itemOptionsTable> {
+	$selections: ItemSelectionRepository;
+
+	constructor() {
+		super();
+		this.$selections = new ItemSelectionRepository();
+	}
 
 	static #objsView = sql.raw(
 		db.query.itemOptionsTable.findMany({

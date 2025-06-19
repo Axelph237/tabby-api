@@ -41,13 +41,13 @@ const selectionRoutes = new Elysia({ prefix: "/selections" })
 	.guard({ params: t.Object({ itemId: t.Integer() }), isAuthenticated: true })
 	// 2.8 - Create selection
 	.post("/", async ({  params, body, itemRepo, user }) =>
-		asUser(user?.id, itemRepo.$selections.create({ parentItemId: params.itemId, ...body })), 
+		asUser(user?.id, itemRepo.$options.$selections.create({ parentItemId: params.itemId, ...body })), 
 	{
 		body: t.Omit(tNewItemSelection, ["parentItemId"])
 	})
 	// 2.9 - Delete selection
 	.delete("/:selId", async ({ params, itemRepo, user }) => {
-		await asUser(user?.id, itemRepo.$selections.remove(params.selId))
+		await asUser(user?.id, itemRepo.$options.$selections.remove(params.selId))
 		return { message: "Successfully deleted selections." }
 	}, {
 		params: t.Object({ selId: t.Integer() }),
@@ -55,7 +55,7 @@ const selectionRoutes = new Elysia({ prefix: "/selections" })
 	})
 	// 2.10 - Update selection
 	.put("/:selId", async ({ params, body, itemRepo, user }) => 
-		asUser(user?.id, itemRepo.$selections.update({ id: params.selId, ...body })), 
+		asUser(user?.id, itemRepo.$options.$selections.update({ id: params.selId, ...body })), 
 	{
 		params: t.Object({ selId: t.Integer() }),
 		body: t.Partial(tNewItemSelection)
@@ -66,9 +66,12 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 	.use(authMiddleware)
 	.guard({ isAuthenticated: true })
 	// 2.1 - Get user's items
-	.get("/", async ({ itemRepo, user }) => 
-		asUser(user?.id, itemRepo.index())
-	)
+	.get("/", async ({ itemRepo, user, query }) => {
+		// console.log(query)
+		const result = await asUser<{ selections: {}[] }[]>(user?.id, itemRepo.index())
+		console.log(result);
+		return result;
+	})
 	// 2.2 - Create new item
 	.post("/", async ({ body, itemRepo, user }) => 
 		asUser(user?.id, itemRepo.create(body)),

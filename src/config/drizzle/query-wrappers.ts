@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, WithSubquery } from "drizzle-orm";
 import { PgTableWithColumns } from "drizzle-orm/pg-core";
 import { NeonHttpQueryResult } from "drizzle-orm/neon-http";
 import db from "./db";
@@ -7,6 +7,10 @@ import { UUID } from "@utils/types/typebox/uuid";
 
 export function projSelect<P extends PgTableWithColumns<any>>(projection?: SelectProjection<P>) {
 	return (projection ? db.select(projection) : db.select())
+}
+
+export function projSelectWith<P extends PgTableWithColumns<any>>(cte: WithSubquery<any>, projection?: SelectProjection<P>) {
+	return (projection ? db.with(cte).select(projection) : db.with(cte).select())
 }
 
 export function asUser<T>(userId: UUID | undefined, query: AnySimpleQuery | AnyDynamicQuery): Promise<T> {

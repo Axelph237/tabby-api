@@ -13,6 +13,7 @@ export const tItemSelection = createSelectSchema(itemSelectionsTable);
 export const tNewItemSelection = createInsertSchema(itemSelectionsTable);
 
 class ItemSelectionRepository extends Repository<typeof itemSelectionsTable> {
+
 	index(projection?: ItemSelectionProjection) {
 		return projSelect(projection).from(itemSelectionsTable).$dynamic();
 	}
