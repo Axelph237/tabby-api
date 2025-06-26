@@ -3,7 +3,7 @@ import { authMiddleware } from '@middlewares/auth.middleware'
 import { uuidTObj } from '@utils/types/typebox/uuid'
 import { sessionDetailsTObj } from '@features/session/session.validation'
 import SessionRepository, { tNewSession } from './session.repository'
-import { asUser } from '@config/drizzle/query-wrappers'
+import { asGuest, asUser } from '@config/drizzle/query-wrappers'
 
 export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.use(authMiddleware)
@@ -24,7 +24,7 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 					isAuthenticated: true
 				})
 			// 4.3 - Get session public details
-			.get("/", ({ params, sessionRepo, user }) => 
-				asUser(user?.id, sessionRepo.get(params.sessId)))
+			.get("/", ({ params, sessionRepo }) => 
+				asGuest(sessionRepo.get(params.sessId)))
 	)
 
