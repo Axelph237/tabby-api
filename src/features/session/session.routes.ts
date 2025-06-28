@@ -4,6 +4,8 @@ import { uuidTObj } from '@utils/types/typebox/uuid'
 import { sessionDetailsTObj } from '@features/session/session.validation'
 import SessionRepository, { tNewSession } from './session.repository'
 import { asGuest, asUser } from '@config/drizzle/query-wrappers'
+import { eq } from 'drizzle-orm'
+import { sessionsTable } from '@config/drizzle/tables/sessions.table'
 
 export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 	.use(authMiddleware)
@@ -14,6 +16,16 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 		{
 			isAuthenticated: true,
 			body: tNewSession
+		})
+	.get("/", async ({ body, sessionRepo, user, query }) => {
+		const q = sessionRepo.index();
+		if (query.menuId) {
+			q.where(eq(sessionsTable.menuId, query.menuId))
+		}
+		return asUser(user?.id, q);
+	},
+		{
+			isAuthenticated: true,
 		})
 	.group("/:sessId", { params: t.Object({ sessId: uuidTObj }) }, app => app
 			// 4.2 - Close session

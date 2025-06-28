@@ -1,11 +1,11 @@
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@middlewares/auth.middleware'
 import { messageResponseObj } from '@utils/types/typebox/messageResponse'
-import ItemRepository, { tNewItem } from '@features/item/item.repository'
+import ItemRepository, { Item, tNewItem } from '@features/item/item.repository'
 import { tTimeless } from '@utils/types/typebox/timeless'
 import { tNewItemOption } from '@features/item/item-option.repository'
 import { tNewItemSelection } from '@features/item/item-selection.repository'
-import { asUser } from '@config/drizzle/query-wrappers'
+import { asUser, queryOne } from '@config/drizzle/query-wrappers'
 
 const itemRepo = new Elysia()
 	.decorate("itemRepo", new ItemRepository())
@@ -73,10 +73,14 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 		return result;
 	})
 	// 2.2 - Create new item
-	.post("/", async ({ body, itemRepo, user }) => 
-		asUser(user?.id, itemRepo.create(body)),
+	.post("/", async ({ body, itemRepo, user, error }) => {
+		if (user) {
+			return queryOne(asUser<Item[]>(user.id, itemRepo.create({ ...body, ownerId: user.id })))
+		}
+		throw error(401, "User not found.");
+	},
 		{ 
-			body: tTimeless<typeof tNewItem>(tNewItem) 
+			body: t.Omit(tTimeless<typeof tNewItem>(tNewItem), ["ownerId"]) 
 		})
 	// Item specific routes
 	.group("/:itemId", { params: t.Object({ itemId: t.Integer() }) }, app => app
@@ -87,9 +91,9 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 		})
 		// 2.4 - Update item
 		.put("/", async ({ params, body, itemRepo, user }) => 
-			asUser(user?.id, itemRepo.update({ id: params.itemId, ...body })),
+			queryOne(asUser<Item[]>(user?.id, itemRepo.update({ id: params.itemId, ownerId: user?.id, ...body }).returning())),
 			{ 
-				body: t.Partial(tNewItem) 
+				body: t.Partial(tTimeless(tNewItem)) 
 			})
 		// OPTIONS
 		.use(optionRoutes)

@@ -70,7 +70,8 @@ class ItemRepository extends Repository<typeof itemsTable> {
 	}
 
 	update(item: Partial<Item> & Pick<Item, "id">) {
-		return db.update(itemsTable).set(item).where(eq(itemsTable.id, item.id)).$dynamic();
+		const { id, ...insert } = item;
+		return db.update(itemsTable).set(insert).where(eq(itemsTable.id, id)).$dynamic();
 	}
 
 	remove(id: number) {
