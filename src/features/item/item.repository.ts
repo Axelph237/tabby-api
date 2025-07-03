@@ -62,7 +62,7 @@ class ItemRepository extends Repository<typeof itemsTable> {
 
 	get(id: number, projection?: ItemProjection) {
 		const itemObjsCTE = db.$with('itemObjsCTE').as(this.#itemObjs());
-		return projSelectWith(itemObjsCTE, projection).from(itemObjsCTE).limit(1).$dynamic();
+		return projSelectWith(itemObjsCTE, projection).from(itemObjsCTE).where(eq(itemObjsCTE.id, id)).limit(1).$dynamic();
 	}
 
 	create(item: NewItem) {

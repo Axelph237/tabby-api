@@ -1,7 +1,7 @@
 import db from '@config/drizzle/db'
 import Repository from '@utils/types/repository'
 import { UUID } from '@utils/types/typebox/uuid'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { Timeless } from '@utils/types/typebox/timeless'
 import { projSelect } from '@config/drizzle/query-wrappers'
@@ -34,6 +34,15 @@ class SessionRepository extends Repository<typeof sessionsTable> {
 
     remove(id: UUID) {
         return db.delete(sessionsTable).where(eq(sessionsTable.id, id)).$dynamic();
+    }
+
+    _getWithMenu(id: UUID) {
+        return db.query.sessionsTable.findFirst({
+            with: {
+                menu: true
+            },
+            where: eq(sessionsTable.id, id)
+        })
     }
 }
 

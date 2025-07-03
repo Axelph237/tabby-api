@@ -84,6 +84,11 @@ export const itemRoutes = new Elysia({ prefix: "/items" })
 		})
 	// Item specific routes
 	.group("/:itemId", { params: t.Object({ itemId: t.Integer() }) }, app => app
+		.get("/", async ({ params, itemRepo, user}) => {
+			const item = await queryOne(asUser<Item[]>(user?.id, itemRepo.get(params.itemId)))
+			console.log(item);
+			return item;
+		})
 		// 2.3 - Delete item
 		.delete("/", async ({ params, itemRepo, user }) => {
 			await asUser(user?.id, itemRepo.remove(params.itemId));
