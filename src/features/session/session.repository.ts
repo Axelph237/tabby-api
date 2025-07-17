@@ -36,13 +36,39 @@ class SessionRepository extends Repository<typeof sessionsTable> {
         return db.delete(sessionsTable).where(eq(sessionsTable.id, id)).$dynamic();
     }
 
-    _getWithMenu(id: UUID) {
-        return db.query.sessionsTable.findFirst({
+    async _getWithMenu(id: UUID) {
+        const queryRes = await db.query.sessionsTable.findFirst({
             with: {
-                menu: true
+                menu: {
+                    with: {
+                        itemsToMenus: {
+                            columns: {},
+                            with: {
+                                item: true
+                            }
+                        }
+                    }
+                }
             },
             where: eq(sessionsTable.id, id)
         })
+
+        if (queryRes) {
+            const { menu: { itemsToMenus, ...menu }, ...sess } = queryRes;
+
+            const mappedMenu = {
+                items: itemsToMenus.map(v => v.item),
+                ...menu
+            }
+
+            const mappedSess = {
+                menu: mappedMenu,
+                ...sess
+            }
+
+            return mappedSess;
+        }
+        return queryRes; // Only if queryRes is some kind of falsey value
     }
 }
 

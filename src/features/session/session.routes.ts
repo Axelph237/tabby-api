@@ -37,7 +37,7 @@ export const sessionRoutes = new Elysia({ prefix: "/sessions" })
 				})
 			// 4.3 - Get session public details
 			.get("/", async ({ params, sessionRepo }) => {
-				return sessionRepo._getWithMenu(params.sessId)
+				return sessionRepo._getWithMenu(params.sessId);
 			})
 	)
 
